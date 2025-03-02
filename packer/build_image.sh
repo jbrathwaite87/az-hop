@@ -15,10 +15,23 @@ ANSIBLE_VARIABLES=../playbooks/group_vars/all.yml
 
 
 
-# Ensure correct subscription is set
-CORRECT_SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"  # Replace with your actual subscription ID
-az login -i
+# Ensure the correct subscription
+CORRECT_SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"
+
+echo "Authenticating using the Managed Identity..."
+az login --identity
+
+echo "Setting the correct subscription..."
 az account set --subscription $CORRECT_SUBSCRIPTION_ID
+
+echo "Verifying the active subscription..."
+az account show --output table
+
+echo "Ensuring Packer uses the Managed Identity..."
+export ARM_USE_MSI=true
+export ARM_SUBSCRIPTION_ID=$CORRECT_SUBSCRIPTION_ID
+export ARM_CLIENT_ID=$(az account show --query user.name -o tsv)
+
 
 
 if [ $# -lt 2 ]; then
