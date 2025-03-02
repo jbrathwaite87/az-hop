@@ -83,7 +83,7 @@ resource "azurerm_subnet" "netapp" {
     }
   }
 }
-
+/*
 # database subnet
 data "azurerm_subnet" "database" {
   count                = local.create_database_subnet ? 0 : 1
@@ -91,6 +91,7 @@ data "azurerm_subnet" "database" {
   resource_group_name  = try(split("/", local.vnet_id)[4], "foo")
   virtual_network_name = try(split("/", local.vnet_id)[8], "foo")
 }
+*/
 
 resource "azurerm_subnet" "database" {
   count                = local.create_database_subnet ? 1 : 0
