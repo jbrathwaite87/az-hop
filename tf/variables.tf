@@ -23,5 +23,5 @@ variable tenant_id {
 variable logged_user_objectId {
   type = string
   description = "The azure user logged object id"
-  default = ""
+  default = "55d09668-f5c7-47f8-9f6a-2aeea3fd0c96"
 }
