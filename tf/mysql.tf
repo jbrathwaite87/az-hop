@@ -28,25 +28,3 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   }
 }
 
-resource "random_password" "db_password" {
-  count             = local.create_database ? 1 : 0
-  length            = 16
-  special           = false
-  min_lower         = 1
-  min_upper         = 1
-  min_numeric       = 1
-}
-
-resource "azurerm_key_vault_secret" "database_password" {
-  count        = local.create_database ? 1 : 0
-  depends_on   = [time_sleep.delay_create, azurerm_key_vault_access_policy.admin] # As policies are created in the same deployment add some delays to propagate
-  name         = format("%s-password", azurerm_mysql_flexible_server.mysql[0].administrator_login)
-  value        = random_password.db_password[0].result
-  key_vault_id = azurerm_key_vault.azhop.id
-
-  lifecycle {
-    ignore_changes = [
-      value
-    ]
-  }
-}
