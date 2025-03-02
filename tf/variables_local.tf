@@ -283,10 +283,10 @@ locals {
     create_dnsfw_rules = length(local.dns_forwarders) > 0 ? true : false
 
     subnets = merge(local._subnets, 
-                    local.no_bastion_subnet ? {} : {bastion = "AzureBastionSubnet"},
-                    local.no_gateway_subnet ? {} : {gateway = "GatewaySubnet"},
-                    local.no_outbounddns_subnet ? {} : {outbounddns = "outbounddns"}
-                    )
+                    local.create_bastion_subnet ? {bastion = "AzureBastionSubnet"} : {}, # FIX: Use create_bastion_subnet
+                    local.create_gateway_subnet ? {gateway = "GatewaySubnet"} : {},
+                    local.create_outbounddns_subnet ? {outbounddns = "outbounddns"} : {}
+    )
 
     # Application Security Groups
     create_nsg = try(local.configuration_yml["network"]["create_nsg"], local.create_vnet )
