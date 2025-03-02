@@ -18,20 +18,6 @@ SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"
 echo "Authenticating using the Managed Identity..."
 az login --identity
 
-# Add this to your parameter parsing loop
-while (( "$#" )); do
-  case "${1}" in
-    # ... existing parameters ...
-    --subscription-id)
-      SUBSCRIPTION_ID=${2}
-      shift 2
-    ;;
-    # ... other parameters ...
-  esac
-done
-
-
-
 # If no subscription ID is provided, get the current one
 if [ -z "$SUBSCRIPTION_ID" ]; then
   SUBSCRIPTION_ID=$(az account show --query id -o tsv)
