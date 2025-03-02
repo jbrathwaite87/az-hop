@@ -13,8 +13,11 @@ SPN_FILE=spn.json
 CONFIG_FILE=../config.yml
 ANSIBLE_VARIABLES=../playbooks/group_vars/all.yml
 
+
+
 # Ensure correct subscription is set
 CORRECT_SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"  # Replace with your actual subscription ID
+az login -i
 az account set --subscription $CORRECT_SUBSCRIPTION_ID
 
 
@@ -75,29 +78,7 @@ if [ ! -f ${PACKER_FILE} ]; then
   exit 1
 fi
 
-tenant_id=$(az account show -o json | jq -r .tenantId)
-user_type=$(az account show --query user.type -o tsv)
-if [ ${user_type} == "user" ]; then
-  use_azure_cli_auth=true
-else
-  export clientId=$(az account show --query user.name -o tsv)
-  case "${clientId}" in
-      "systemAssignedIdentity")
-          vmname=$(curl -s --noproxy "*" -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2019-08-15" | jq -r '.compute.name')
-          echo " - logged in Azure with System Assigned Identity from ${vmname}"
-          use_azure_cli_auth=false
-          ;;
-      "userAssignedIdentity")
-          echo "userAssignedIdentity not supported; please use a systemAssignedIdentity or a Service Principal Name instead"
-          exit 1
-          ;;
-      *)
-          use_azure_cli_auth=true
-          logged_user_upn=$(az ad sp show --id ${clientId} --query displayName -o tsv)
-          echo " - logged in Azure with Service Principal Name ${logged_user_upn}"
-          ;;
-  esac
-fi
+
 
 image_name=$(basename "$PACKER_FILE")
 image_name="${image_name%.*}"
