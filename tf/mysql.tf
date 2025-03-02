@@ -7,7 +7,7 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   administrator_login          = local.database_user
   administrator_password       = random_password.db_password[0].result
 
-  delegated_subnet_id          = local.create_database_subnet ? azurerm_subnet.database[0].id : data.azurerm_subnet.database[0].id
+  delegated_subnet_id          = local.create_database_subnet ? azurerm_subnet.database[0].id : null
 
   sku_name   = "B_Standard_B2ms"
   version    = "8.0.21"
