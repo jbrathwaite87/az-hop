@@ -1,3 +1,7 @@
+output "ondemand_url" {
+  value = "${azurerm_public_ip.ondemand-pip[0].domain_name_label}.eastus.cloudapp.azure.com"
+}
+
 resource "local_file" "AnsibleInventory" { 
   content = templatefile("${local.playbooks_template_dir}/inventory.tmpl",
    {
