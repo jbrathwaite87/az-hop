@@ -91,7 +91,7 @@ image_name=$(basename "$PACKER_FILE")
 image_name="${image_name%.*}"
 
 # Retrieve the Image ID
-resource_group=$(jq -r '.var_resource_group' $OPTIONS_FILE)
+resource_group="automated-image-build-rg"
 image_id=$(az image list -g $resource_group --query "[?name=='$image_name'].id" -o tsv)
 
 # Generate install script checksum
@@ -164,7 +164,7 @@ else
   echo "Image $image_name exists, skipping building the image"
 fi
 
-sig_name=$(jq -r '.var_sig_name' $OPTIONS_FILE)
+sig_name="aps_image_gallery"
 
 # Create the image definition if it doesn't exists
 img_def_id=$(az sig image-definition list -r $sig_name -g $resource_group --query "[?name=='$image_name'].id" -o tsv)
