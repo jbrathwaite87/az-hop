@@ -126,7 +126,7 @@ resource "azurerm_subnet" "ad" {
 
 # bastion subnet
 data "azurerm_subnet" "bastion" {
-  count                = local.create_bastion_subnet ? 1 : (local.no_bastion_subnet ? 0 : 1)
+  count = local.create_bastion_subnet && !local.no_bastion_subnet ? 1 : 0
   name                 = "AzureBastionSubnet"
   resource_group_name  = try(split("/", local.vnet_id)[4], "foo")
   virtual_network_name = try(split("/", local.vnet_id)[8], "foo")
