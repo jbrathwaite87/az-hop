@@ -47,7 +47,7 @@ resource "azurerm_key_vault_access_policy" "reader" {
   count = local.key_vault_readers != null ? 1 : 0
   key_vault_id = azurerm_key_vault.azhop.id
   tenant_id    = local.tenant_id
-  object_id    = local.key_vault_readers != null ? local.key_vault_readers : local.logged_user_objectId
+  object_id    = local.key_vault_readers != null ? local.key_vault_readers : var.logged_user_objectId
 
   secret_permissions = [
       "Get",
