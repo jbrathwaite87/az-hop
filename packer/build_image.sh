@@ -13,25 +13,38 @@ SPN_FILE=spn.json
 CONFIG_FILE=../config.yml
 ANSIBLE_VARIABLES=../playbooks/group_vars/all.yml
 
-
-
-# Ensure the correct subscription
-CORRECT_SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"
-
+# Add this near the beginning of the script, where other parameters are defined
+SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"
 echo "Authenticating using the Managed Identity..."
 az login --identity
 
-echo "Setting the correct subscription..."
-az account set --subscription $CORRECT_SUBSCRIPTION_ID
+# Add this to your parameter parsing loop
+while (( "$#" )); do
+  case "${1}" in
+    # ... existing parameters ...
+    --subscription-id)
+      SUBSCRIPTION_ID=${2}
+      shift 2
+    ;;
+    # ... other parameters ...
+  esac
+done
 
-echo "Verifying the active subscription..."
-az account show --output table
 
-echo "Ensuring Packer uses the Managed Identity..."
-export ARM_USE_MSI=true
-export ARM_SUBSCRIPTION_ID=$CORRECT_SUBSCRIPTION_ID
-export ARM_CLIENT_ID=$(az account show --query user.name -o tsv)
 
+# If no subscription ID is provided, get the current one
+if [ -z "$SUBSCRIPTION_ID" ]; then
+  SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+  echo "Using current subscription: $SUBSCRIPTION_ID"
+else
+  # Set the specified subscription as active
+  echo "Setting subscription to: $SUBSCRIPTION_ID"
+  az account set --subscription "$SUBSCRIPTION_ID"
+fi
+
+
+
+# Then proceed with the rest of the script
 
 
 if [ $# -lt 2 ]; then
