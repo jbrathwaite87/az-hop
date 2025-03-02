@@ -1,15 +1,17 @@
 #!/bin/bash
+# Node setup script for ParaView with TurboVNC support
 # Pre-requisites:
 # - jq installed
+
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$script_dir/../files/azhop-helpers.sh" 
+source "$script_dir/../files/azhop-helpers.sh"
 read_os
 
 # Apply default configuration to the node
 # Remote read access to the cluster init script files for all users
 chmod 700 -R /mnt/cluster-init
 
-# change access to resource so that temp jobs can be written there
+# Change access to resource so that temp jobs can be written there
 # on Ubuntu and AlmaLinux resource disk is mounted in /mnt
 [ -d /mnt/resource ] || mkdir /mnt/resource
 chmod 777 /mnt/resource
@@ -18,23 +20,98 @@ chmod 777 /mnt/resource
 # slurmd binary expects 'su' in /usr/bin
 [ -e /usr/bin/su ] || ln -s /bin/su /usr/bin/su
 
-# For any NV instances, reinit the session
+# Get VM size information
 VM_SIZE=$(curl -s --noproxy "*" -H Metadata:true "http://169.254.169.254/metadata/instance/compute?api-version=2019-08-15" | jq -r '.vmSize' | tr '[:upper:]' '[:lower:]' | sed 's/standard_//')
-case $VM_SIZE in
-  nv*|nc*t4_v3)
-    echo "Configure xorg.conf"
+
+# Install TurboVNC and VirtualGL
+echo "Installing TurboVNC and VirtualGL dependencies..."
+
+# For Ubuntu
+if [[ -f /etc/debian_version ]]; then
+    apt-get update
+    apt-get install -y libxtst6 libc6 libc6-dev libgcc-s1 libstdc++6 libx11-6 libxext6 libxv1 libpam0g
+
+    # For TurboVNC
+    TURBOVNC_VERSION="3.0.3"
+    TURBOVNC_DEB="turbovnc_${TURBOVNC_VERSION}_amd64.deb"
+    if ! command -v vncserver &> /dev/null; then
+        echo "Installing TurboVNC ${TURBOVNC_VERSION}..."
+        wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/${TURBOVNC_DEB}"
+        dpkg -i ${TURBOVNC_DEB}
+        apt-get -f install -y
+        rm ${TURBOVNC_DEB}
+    fi
+
+    # For VirtualGL (GPU acceleration)
+    if [[ $VM_SIZE == nv* || $VM_SIZE == nc*t4_v3 ]]; then
+        if ! command -v vglrun &> /dev/null; then
+            echo "Installing VirtualGL..."
+            VIRTUALGL_VERSION="3.1"
+            VIRTUALGL_DEB="virtualgl_${VIRTUALGL_VERSION}_amd64.deb"
+            wget -q "https://sourceforge.net/projects/virtualgl/files/${VIRTUALGL_VERSION}/${VIRTUALGL_DEB}"
+            dpkg -i ${VIRTUALGL_DEB}
+            apt-get -f install -y
+            rm ${VIRTUALGL_DEB}
+        fi
+    fi
+
+# For RHEL/CentOS/AlmaLinux
+elif [[ -f /etc/redhat-release ]]; then
+    yum install -y libX11 libXext libXtst
+
+    # For TurboVNC
+    if ! command -v vncserver &> /dev/null; then
+        echo "Installing TurboVNC..."
+        TURBOVNC_VERSION="3.0.3"
+        TURBOVNC_RPM="turbovnc-${TURBOVNC_VERSION}.x86_64.rpm"
+        wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/${TURBOVNC_RPM}"
+        yum install -y ./${TURBOVNC_RPM}
+        rm ./${TURBOVNC_RPM}
+    fi
+
+    # For VirtualGL (GPU acceleration)
+    if [[ $VM_SIZE == nv* || $VM_SIZE == nc*t4_v3 ]]; then
+        if ! command -v vglrun &> /dev/null; then
+            echo "Installing VirtualGL..."
+            VIRTUALGL_VERSION="3.1"
+            VIRTUALGL_RPM="VirtualGL-${VIRTUALGL_VERSION}.x86_64.rpm"
+            wget -q "https://sourceforge.net/projects/virtualgl/files/${VIRTUALGL_VERSION}/${VIRTUALGL_RPM}"
+            yum install -y ./${VIRTUALGL_RPM}
+            rm ./${VIRTUALGL_RPM}
+        fi
+    fi
+fi
+
+# Create default TurboVNC configuration
+mkdir -p /etc/turbovnc
+cat > /etc/turbovnc/vncserver.conf << 'EOL'
+# TurboVNC Server Configuration
+geometry=1920x1080
+dpi=96
+alwaysshared
+EOL
+
+# Configure VirtualGL for GPU nodes
+if [[ $VM_SIZE == nv* || $VM_SIZE == nc*t4_v3 ]]; then
+    echo "Configure xorg.conf for GPU nodes"
     nvidia-xconfig --enable-all-gpus --allow-empty-initial-configuration -c /etc/X11/xorg.conf --virtual=1920x1200 -s
-    sed -i '/Section "Device"/a\    Option         "HardDPMS" "false"' /etc/X11/xorg.conf
+    sed -i '/Section "Device"/a\ Option "HardDPMS" "false"' /etc/X11/xorg.conf
+
+    # Configure VirtualGL only if it's installed
+    if command -v vglserver_config &> /dev/null; then
+        echo "Configuring VirtualGL..."
+        # Non-interactive configuration, enable server-side rendering
+        /opt/VirtualGL/bin/vglserver_config -config +s +f -t
+    fi
+
     echo "Enabling GUI"
     systemctl restart gdm
-    
     if [ -e $script_dir/../files/$os_release/fix_websockify.sh ]; then
-      $script_dir/../files/$os_release/fix_websockify.sh
+        $script_dir/../files/$os_release/fix_websockify.sh
     fi
-  ;;
-esac
+fi
 
-# Create a symlink for the Modules to allow compatibility with the HPC CentOS image which have Modules in capital case
+# Create a symlink for the Modules to allow compatibility with the HPC CentOS image
 if [ ! -d /usr/share/Modules ]; then
     ln -s /usr/share/modules /usr/share/Modules
 fi
@@ -44,8 +121,51 @@ export MODULEPATH=$MODULEPATH:/usr/share/Modules/modulefiles/
 
 # Disable the antivirus
 if [ -a /usr/lib/systemd/system/azsecd.service ] ; then
-  systemctl stop azsecd
-  systemctl disable azsecd
-  echo "Disabled azsecd service"
+    systemctl stop azsecd
+    systemctl disable azsecd
+    echo "Disabled azsecd service"
 fi
 
+# Ensure proper permissions and symbolic links for VNC
+# Create vnc directory in users' home directories
+for DIR in /home/*; do
+    USER=$(basename "$DIR")
+    if [ -d "$DIR" ]; then
+        VNC_DIR="$DIR/.vnc"
+        if [ ! -d "$VNC_DIR" ]; then
+            mkdir -p "$VNC_DIR"
+            chown $USER:$USER "$VNC_DIR"
+            chmod 700 "$VNC_DIR"
+        fi
+    fi
+done
+
+# Create symbolic links for TurboVNC executables if needed
+if [ -d "/opt/TurboVNC/bin" ]; then
+    # Check if turbovnc is in the PATH
+    if ! command -v vncserver &> /dev/null; then
+        ln -sf /opt/TurboVNC/bin/vncserver /usr/bin/vncserver
+        ln -sf /opt/TurboVNC/bin/vncviewer /usr/bin/vncviewer
+        ln -sf /opt/TurboVNC/bin/vncpasswd /usr/bin/vncpasswd
+    fi
+fi
+
+# Verify TurboVNC installation
+if command -v vncserver &> /dev/null; then
+    echo "TurboVNC installation verified!"
+    vncserver -version
+else
+    echo "WARNING: TurboVNC installation could not be verified."
+fi
+
+# Verify VirtualGL installation for GPU nodes
+if [[ $VM_SIZE == nv* || $VM_SIZE == nc*t4_v3 ]]; then
+    if command -v vglrun &> /dev/null; then
+        echo "VirtualGL installation verified!"
+        vglrun -version
+    else
+        echo "WARNING: VirtualGL installation could not be verified."
+    fi
+fi
+
+echo "Node setup completed successfully!"
