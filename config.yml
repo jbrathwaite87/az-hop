@@ -112,7 +112,7 @@ queues:
     idle_timeout: 300
     MaxScaleSetSize: 100
   - name: hpc
-    vm_size: Standard_HB176-48rs_v4
+    vm_size: Standard_HB120-64rs_v3 #Standard_HB176-48rs_v4
     max_core_count: 1000
     image: 'azhpc:azhop-compute:almalinux-8_10:2024.1209.1326'
     EnableAcceleratedNetworking: true
@@ -133,7 +133,7 @@ queues:
     max_hours: 12
     min_hours: 1
   - name: viz
-    vm_size: Standard_E8_v3
+    vm_size: Standard_HB120-16rs_v3
     max_core_count: 200
     image: 'azhpc:azhop-desktop:almalinux-8_10:2024.1209.1416'
     ColocateNodes: false
