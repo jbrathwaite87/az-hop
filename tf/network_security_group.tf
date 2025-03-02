@@ -97,7 +97,7 @@ resource "azurerm_subnet_network_security_group_association" "admin" {
 
 resource "azurerm_subnet_network_security_group_association" "database" {
   count                     = local.create_nsg ? 1 : 0
-  subnet_id                 = local.create_database_subnet ? azurerm_subnet.database[0].id : data.azurerm_subnet.database[0].id
+  subnet_id                 = local.create_database_subnet ? azurerm_subnet.database[0].id : null
   network_security_group_id = azurerm_network_security_group.common[0].id
 }
 
