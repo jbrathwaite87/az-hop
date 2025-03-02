@@ -13,6 +13,11 @@ SPN_FILE=spn.json
 CONFIG_FILE=../config.yml
 ANSIBLE_VARIABLES=../playbooks/group_vars/all.yml
 
+# Ensure correct subscription is set
+CORRECT_SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"  # Replace with your actual subscription ID
+az account set --subscription $CORRECT_SUBSCRIPTION_ID
+
+
 if [ $# -lt 2 ]; then
   echo "Usage build_image.sh "
   echo "  Required arguments:"
