@@ -28,7 +28,13 @@ resource "azurerm_key_vault" "azhop" {
 resource "azurerm_role_assignment" "admin" {
   scope                = azurerm_key_vault.azhop.id
   role_definition_name = "Key Vault Administrator"
-  principal_id        = data.azurerm_client_config.current.object_id
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+resource "azurerm_role_assignment" "contributor" {
+  scope                = azurerm_key_vault.azhop.id
+  role_definition_name = "Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_role_assignment" "reader" {
@@ -39,7 +45,7 @@ resource "azurerm_role_assignment" "reader" {
 }
 
 resource "azurerm_role_assignment" "secret_users" {
-  for_each            = var.secret_user_object_ids
+  for_each            = length(var.secret_user_object_ids) > 0 ? tomap({ for idx, id in var.secret_user_object_ids : idx => id }) : {}
   scope               = azurerm_key_vault.azhop.id
   role_definition_name = "Key Vault Secrets User"
   principal_id        = each.value
