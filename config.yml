@@ -142,6 +142,16 @@ queues:
     min_hours: 1
 image_gallery:
   create: false
+
+images:
+  - name: base-ubuntu-20_04-v2-rdma-gpgpu
+    publisher: azhop
+    offer: 0001-com-ubuntu-server-focal
+    sku: 20_04-lts-gen2-rdma-gpgpu
+    hyper_v: V2
+    os_type: Linux
+    version: 20.04
+
 applications:
   bc_codeserver:
     enabled: true
