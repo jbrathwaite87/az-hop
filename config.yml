@@ -43,7 +43,7 @@ network:
         create: true
       bastion:
         address_prefixes: 10.128.3.0/26
-        create: true
+        create: false
       compute:
         name: compute
         address_prefixes: 10.128.1.0/24
