@@ -142,6 +142,7 @@ resource "azurerm_subnet" "bastion" {
 }
 
 
+/*
 # Gateway subnet
 data "azurerm_subnet" "gateway" {
   count                = local.create_gateway_subnet ? 0 : (local.no_gateway_subnet ? 0 : 1)
@@ -149,9 +150,9 @@ data "azurerm_subnet" "gateway" {
   resource_group_name  = try(split("/", local.vnet_id)[4], "foo")
   virtual_network_name = try(split("/", local.vnet_id)[8], "foo")
 }
-
+*/
 resource "azurerm_subnet" "gateway" {
-  count                = local.create_gateway_subnet ? (local.no_gateway_subnet ? 0 : 1) : 0
+  count                = local.create_gateway_subnet && !local.no_gateway_subnet ? 1 : 0
   name                 = "GatewaySubnet"
   virtual_network_name = local.create_vnet ? azurerm_virtual_network.azhop[count.index].name : data.azurerm_virtual_network.azhop[count.index].name
   resource_group_name  = local.create_vnet ? azurerm_virtual_network.azhop[count.index].resource_group_name : data.azurerm_virtual_network.azhop[count.index].resource_group_name
