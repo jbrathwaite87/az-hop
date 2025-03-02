@@ -1,5 +1,7 @@
+data "azurerm_client_config" "current" {}
+
 resource "time_sleep" "delay_create" {
-  depends_on   = [azurerm_key_vault_access_policy.admin] # As policies are created in the same deployment add some delays to propagate
+  depends_on      = [azurerm_role_assignment.admin]
   create_duration = "20s"
 }
 
@@ -10,13 +12,10 @@ resource "azurerm_key_vault" "azhop" {
   enabled_for_disk_encryption = true
   enabled_for_deployment      = true
   enabled_for_template_deployment = true
-  tenant_id                   = local.tenant_id
-  # soft delete is enabled by default now (2021-8-25), with 90 days retention
-  # soft_delete_enabled         = true
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = true
-  # TODO => Add the option to enable VMs to keep secrets in KV
-  sku_name = "standard"
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  soft_delete_retention_days   = 7
+  purge_protection_enabled     = true
+  sku_name                     = "standard"
 
   network_acls {
     default_action             = local.locked_down_network ? "Deny" : "Allow"
@@ -26,85 +25,67 @@ resource "azurerm_key_vault" "azhop" {
   }
 }
 
-resource "azurerm_key_vault_access_policy" "admin" {
-  key_vault_id = azurerm_key_vault.azhop.id
-  tenant_id    = local.tenant_id
-  object_id    = local.logged_user_objectId
-
-  secret_permissions = [
-      "Get",
-      "Set",
-      "List",
-      "Delete",
-      "Purge",
-      "Recover",
-      "Restore"
-    ]
+resource "azurerm_role_assignment" "admin" {
+  scope                = azurerm_key_vault.azhop.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id        = data.azurerm_client_config.current.object_id
 }
 
-# Only create the reader access policy when the key_vault_reader is set
-resource "azurerm_key_vault_access_policy" "reader" {
-  count = local.key_vault_readers != null ? 1 : 0
-  key_vault_id = azurerm_key_vault.azhop.id
-  tenant_id    = local.tenant_id
-  object_id    = local.key_vault_readers != null ? local.key_vault_readers : var.logged_user_objectId
+resource "azurerm_role_assignment" "reader" {
+  count               = local.key_vault_readers != null ? 1 : 0
+  scope               = azurerm_key_vault.azhop.id
+  role_definition_name = "Key Vault Reader"
+  principal_id        = local.key_vault_readers != null ? local.key_vault_readers : data.azurerm_client_config.current.object_id
+}
 
-  secret_permissions = [
-      "Get",
-      "List"
-    ]
+resource "azurerm_role_assignment" "secret_users" {
+  for_each            = var.secret_user_object_ids
+  scope               = azurerm_key_vault.azhop.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id        = each.value
 }
 
 resource "azurerm_key_vault_secret" "admin_password" {
-  depends_on   = [time_sleep.delay_create, azurerm_key_vault_access_policy.admin] # As policies are created in the same deployment add some delays to propagate
+  depends_on   = [time_sleep.delay_create, azurerm_role_assignment.admin]
   name         = format("%s-password", local.admin_username)
   value        = random_password.password.result
   key_vault_id = azurerm_key_vault.azhop.id
 
   lifecycle {
-    ignore_changes = [
-      value
-    ]
+    ignore_changes = [value]
   }
 }
 
-#adding a domain join user secret. If the customer doesn't bring their own AD then this will be the same as the admin password.
 resource "azurerm_key_vault_secret" "domain_join_password" {
   count        = local.use_existing_ad ? 1 : 0
-  depends_on   = [time_sleep.delay_create, azurerm_key_vault_access_policy.admin] # As policies are created in the same deployment add some delays to propagate
+  depends_on   = [time_sleep.delay_create, azurerm_role_assignment.admin]
   name         = format("%s-password", local.domain_join_user)
-  value        = local.create_ad ? random_password.password.result : local.domain_join_password 
+  value        = local.create_ad ? random_password.password.result : local.domain_join_password
   key_vault_id = azurerm_key_vault.azhop.id
 
   lifecycle {
-    ignore_changes = [
-      value
-    ]
+    ignore_changes = [value]
   }
 }
 
 resource "azurerm_key_vault_secret" "admin_ssh_private" {
-  depends_on   = [time_sleep.delay_create, azurerm_key_vault_access_policy.admin]
+  depends_on   = [time_sleep.delay_create, azurerm_role_assignment.admin]
   name         = format("%s-private", local.admin_username)
   value        = tls_private_key.internal.private_key_pem
   key_vault_id = azurerm_key_vault.azhop.id
 
   lifecycle {
-    ignore_changes = [
-      value
-    ]
+    ignore_changes = [value]
   }
 }
 
 resource "azurerm_key_vault_secret" "admin_ssh_public" {
-  depends_on   = [time_sleep.delay_create, azurerm_key_vault_access_policy.admin] 
+  depends_on   = [time_sleep.delay_create, azurerm_role_assignment.admin]
   name         = format("%s-public", local.admin_username)
   value        = tls_private_key.internal.public_key_openssh
   key_vault_id = azurerm_key_vault.azhop.id
 
   lifecycle {
-    ignore_changes = [
-      value
-    ]
+    ignore_changes = [value]
   }
 }
