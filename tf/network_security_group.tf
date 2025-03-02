@@ -32,8 +32,7 @@ data "azurerm_subnet" "subnets" {
                   azurerm_subnet.admin, 
                   azurerm_subnet.netapp, 
                   azurerm_subnet.compute,
-                  azurerm_subnet.database,
-                  azurerm_subnet.bastion, 
+                  azurerm_subnet.database, 
                   azurerm_subnet.gateway,
                   azurerm_subnet.outbounddns]
   for_each = local.subnets
