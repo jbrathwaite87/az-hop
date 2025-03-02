@@ -591,15 +591,18 @@ locals {
     }
     
     
-    nsg_rules = merge(  local._nsg_rules, 
-                    local.create_ad || local.use_existing_ad ? local.ad_nsg_rules : {},
-                    local.create_bastion_subnet ? local.bastion_nsg_rules : {},
-                    local.create_gateway_subnet ? local.gateway_nsg_rules : {}, # FIXED HERE
-                    local.allow_public_ip ? local.internet_nsg_rules : local.hub_nsg_rules,
-                    local.create_grafana ? local.grafana_nsg_rules : {},
-                    local.create_database || local.use_existing_database ? local.mysql_nsg_rules : {},
-                    local.create_ondemand ? local.ondemand_nsg_rules : {},
-                    local.lustre_enabled ? local.lustre_nsg_rules : {},
-                    local.anf_nsg_rules
-    )
+    nsg_rules = merge(
+      local._nsg_rules, 
+      local.create_ad || local.use_existing_ad ? local.ad_nsg_rules : {},
+      local.create_bastion_subnet ? local.bastion_nsg_rules : {},
+      local.create_gateway_subnet ? local.gateway_nsg_rules : {}, # FIXED HERE
+      local.create_gateway_subnet ? {} : {AllowInternalWebUsersIn = {}}, # NEW FIX: Explicitly remove rule
+      local.allow_public_ip ? local.internet_nsg_rules : local.hub_nsg_rules,
+      local.create_grafana ? local.grafana_nsg_rules : {},
+      local.create_database || local.use_existing_database ? local.mysql_nsg_rules : {},
+      local.create_ondemand ? local.ondemand_nsg_rules : {},
+      local.lustre_enabled ? local.lustre_nsg_rules : {},
+      local.anf_nsg_rules
+)
+
 }
