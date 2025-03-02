@@ -13,25 +13,6 @@ SPN_FILE=spn.json
 CONFIG_FILE=../config.yml
 ANSIBLE_VARIABLES=../playbooks/group_vars/all.yml
 
-# Add this near the beginning of the script, where other parameters are defined
-SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"
-echo "Authenticating using the Managed Identity..."
-az login --identity
-
-# If no subscription ID is provided, get the current one
-if [ -z "$SUBSCRIPTION_ID" ]; then
-  SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-  echo "Using current subscription: $SUBSCRIPTION_ID"
-else
-  # Set the specified subscription as active
-  echo "Setting subscription to: $SUBSCRIPTION_ID"
-  az account set --subscription "$SUBSCRIPTION_ID"
-fi
-
-
-
-# Then proceed with the rest of the script
-
 
 if [ $# -lt 2 ]; then
   echo "Usage build_image.sh "
@@ -59,6 +40,20 @@ yamllint $CONFIG_FILE
 
 PACKER_OPTIONS="-timestamp-ui"
 KEEP_OS_DISK="false"
+# Add this near the beginning of the script, where other parameters are defined
+SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"
+echo "Authenticating using the Managed Identity..."
+az login --identity
+
+# If no subscription ID is provided, get the current one
+if [ -z "$SUBSCRIPTION_ID" ]; then
+  SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+  echo "Using current subscription: $SUBSCRIPTION_ID"
+else
+  # Set the specified subscription as active
+  echo "Setting subscription to: $SUBSCRIPTION_ID"
+  az account set --subscription "$SUBSCRIPTION_ID"
+fi
 
 while (( "$#" )); do
   case "${1}" in
