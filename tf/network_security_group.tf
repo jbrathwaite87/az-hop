@@ -58,9 +58,9 @@ resource "azurerm_network_security_group" "common" {
       source_port_range          = "*"
       destination_port_ranges    = local.nsg_destination_ports[security_rule.value[4]]
 
-      source_address_prefix                 = try(split("/", security_rule.value[5])[0] == "tag" ? split("/", security_rule.value[5])[1] : null, null)
+      source_address_prefix                 = try(split("/", security_rule.value[5])[0] == "tag" ? split("/", security_rule.value[5])[1] : null, "VirtualNetwork")
       source_application_security_group_ids = split("/", security_rule.value[5])[0] == "asg" ? [azurerm_application_security_group.asg[split("/", security_rule.value[5])[1]].id] : []
-      source_address_prefixes               = try(split("/", security_rule.value[5])[0] == "subnet" ? data.azurerm_subnet.subnets[split("/", security_rule.value[5])[1]].address_prefixes : split("/", security_rule.value[5])[0] == "ips" ? local.ips[split("/", security_rule.value[5])[1]] : null, null)
+      source_address_prefixes               = try(split("/", security_rule.value[5])[0] == "subnet" ? data.azurerm_subnet.subnets[split("/", security_rule.value[5])[1]].address_prefixes : split("/", security_rule.value[5])[0] == "ips" ? local.ips[split("/", security_rule.value[5])[1]] : null, ["0.0.0.0/0"])
 
       destination_address_prefix                 = try(split("/", security_rule.value[6])[0] == "tag" ? split("/", security_rule.value[6])[1] : null, null)
       destination_application_security_group_ids = split("/", security_rule.value[6])[0] == "asg" ? [azurerm_application_security_group.asg[split("/", security_rule.value[6])[1]].id] : []
