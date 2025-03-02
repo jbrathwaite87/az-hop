@@ -12,9 +12,10 @@ resource "azurerm_key_vault" "azhop" {
   enabled_for_disk_encryption = true
   enabled_for_deployment      = true
   enabled_for_template_deployment = true
+  enable_rbac_authorization = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   soft_delete_retention_days   = 7
-  purge_protection_enabled     = true
+  purge_protection_enabled     = false
   sku_name                     = "standard"
 
   network_acls {
