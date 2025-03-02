@@ -123,7 +123,7 @@ resource "azurerm_subnet" "ad" {
   resource_group_name  = local.create_vnet ? azurerm_virtual_network.azhop[count.index].resource_group_name : data.azurerm_virtual_network.azhop[count.index].resource_group_name
   address_prefixes     = [try(local.configuration_yml["network"]["vnet"]["subnets"]["ad"]["address_prefixes"], "10.0.0.0/29")]
 }
-
+/*
 # bastion subnet
 data "azurerm_subnet" "bastion" {
   count                = local.create_bastion_subnet ? 0 : (local.no_bastion_subnet ? 0 : 1)
@@ -131,7 +131,7 @@ data "azurerm_subnet" "bastion" {
   resource_group_name  = try(split("/", local.vnet_id)[4], "foo")
   virtual_network_name = try(split("/", local.vnet_id)[8], "foo")
 }
-
+*/
 resource "azurerm_subnet" "bastion" {
   count                = local.create_bastion_subnet ? (local.no_bastion_subnet ? 0 : 1) : 0
   name                 = "AzureBastionSubnet"
