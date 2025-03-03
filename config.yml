@@ -57,9 +57,9 @@ private_dns:
   registration_enabled: true
 locked_down_network:
   public_ip: true
-linux_base_image: 'azhpc:azhop-compute:ubuntu-20_04:2024.0305.1320'
+linux_base_image: 'canonical:0001-com-ubuntu-minimal-focal-daily:minimal-20_04-daily-lts-gen2:20.04.202502040'
 #linux image plan if required, format is publisher:product:name
-linux_base_plan: 'azhpc:azhop-compute:ubuntu-20_04'
+#linux_base_plan: 'azhpc:azhop-compute:ubuntu-20_04'
 windows_base_image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter-smalldisk:latest'
 jumpbox:
   vm_size: Standard_D2as_v4
