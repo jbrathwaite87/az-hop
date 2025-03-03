@@ -16,9 +16,9 @@ mounts:
     options: '{{anf_home_opts}}'
 admin_user: hpcadmin
 azure_key_vault:
-  name: apsazhopkv
+  name: dapsazhopkv
 azure_storage_account:
-  name: apsazhopsstg
+  name: dapsazhopsstg
 network:
   create_nsg: true
   vnet:
