@@ -159,19 +159,26 @@ else
 fi
 
 # --- Ensure Image Gallery Exists with a Unique Name ---
+# --- Ensure Image Gallery Exists with a Unique Name ---
 base_gallery_name="aps_image_gallery"
-# Check if the gallery exists in the resource group
-existing_gallery=$(az sig gallery list -g "$resource_group" --query "[?name=='$base_gallery_name'].name" -o tsv)
+# Check if a gallery with the base name exists in the resource group
+existing_gallery=$(az sig gallery list --resource-group "$resource_group" --query "[?name=='$base_gallery_name'].name" -o tsv)
 if [ -z "$existing_gallery" ]; then
   # Create a unique gallery name by appending a UTC timestamp
   timestamp=$(date -u +"%Y%m%d%H%M%S")
   sig_name="${base_gallery_name}-${timestamp}"
   echo "Image gallery not found. Creating new image gallery: $sig_name"
-  az sig gallery create --resource-group "$resource_group" --gallery-name "$sig_name" --location eastus --description "Gallery created by build_image.sh"
+  az sig gallery create \
+    --gallery-name "$sig_name" \
+    --resource-group "$resource_group" \
+    --location eastus \
+    --description "Gallery created by build_image.sh" \
+    --permissions Private
 else
   sig_name="$base_gallery_name"
   echo "Image gallery $sig_name exists."
 fi
+
 
 # Create the image definition in the SIG if it doesn't exist
 img_def_id=$(az sig image-definition list -r "$sig_name" -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
