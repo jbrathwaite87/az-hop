@@ -20,12 +20,12 @@ if [ $# -lt 2 ]; then
   echo "  Optional arguments:"
   echo "    -o|--options <options.json>  | file with options for packer generated in the build phase"
   echo "    -f|--force                   | overwrite existing image and always push a new version in the SIG"
-  echo "    -k|--keep                    | keep os disk for future reuse"
+  echo "    -k|--keep                    | keep OS disk for future reuse"
   exit 1
 fi
 
 load_miniconda() {
-  # Packaging inside a function to avoid forwarding arguments to conda
+  # Package inside a function to avoid forwarding arguments to conda
   if [ -d "${THIS_DIR}/../miniconda" ]; then
     echo "Activating conda environment"
     source "${THIS_DIR}/../miniconda/bin/activate"
@@ -33,7 +33,6 @@ load_miniconda() {
 }
 
 load_miniconda
-
 # Check config syntax
 yamllint "$CONFIG_FILE"
 
@@ -95,10 +94,17 @@ if [ -n "$image_id" ]; then
   fi
 fi
 
-# If image doesn't exist or FORCE is set, build a new image
+# If FORCE is set and an image exists, delete it before building a new one
+if [ -n "$image_id" ] && [ $FORCE -eq 1 ]; then
+  echo "Force flag is set. Deleting existing managed image: $image_name"
+  az image delete --ids "$image_id" -o tsv -y
+  image_id=""
+fi
+
+# Build a new image if the image does not exist (or was deleted) or FORCE is set
 if [ -z "$image_id" ] || [ $FORCE -eq 1 ]; then
   logfile="${PACKER_FILE%.*}.log"
-  
+
   # Determine cloud environment
   cloud_env="Public"
   account_env=$(az account show | jq -r '.environmentName')
@@ -113,16 +119,16 @@ if [ -z "$image_id" ] || [ $FORCE -eq 1 ]; then
       cloud_env="Public"
       ;;
   esac
-  
+
   echo "Building/Rebuilding $image_name in $resource_group (log: $logfile)"
   key_vault_name=$(yq eval ".key_vault" "$ANSIBLE_VARIABLES")
-  
+
   echo "Removing OS disk if any..."
   os_disk_id=$(az disk list -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
   if [ -n "$os_disk_id" ]; then
     az disk delete --ids "$os_disk_id" -o tsv -y
   fi
-  
+
   packer plugins install github.com/hashicorp/azure
   
   packer build $PACKER_OPTIONS -var-file "$OPTIONS_FILE" \
