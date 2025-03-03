@@ -54,7 +54,7 @@ network:
 private_dns:
   create: true
   name: hpc.azure
-  registration_enabled: false
+  registration_enabled: true
 locked_down_network:
   public_ip: true
 linux_base_image: 'almalinux:almalinux-x86_64:8-gen2:8.10.2024082001'
@@ -105,7 +105,7 @@ queues:
   - name: htc
     vm_size: Standard_F2s_v2
     max_core_count: 1024
-    image: 'azhpc:azhop-compute:almalinux-8_10:2024.1209.1326'
+    image: '/subscriptions/304c6bf4-26c3-4328-afc5-4b79879826b7/resourceGroups/DEV-APQX-AZHOP-RG/providers/Microsoft.Compute/images/azhop-compute-ubuntu-20_04'
     EnableAcceleratedNetworking: false
     spot: false
     ColocateNodes: false
