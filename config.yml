@@ -16,9 +16,9 @@ mounts:
     options: '{{anf_home_opts}}'
 admin_user: hpcadmin
 azure_key_vault:
-  name: dapqxazhopkv
+  name: deapqxazhopkv
 azure_storage_account:
-  name: dapqxazhopstg
+  name: deapqxazhopstg
 network:
   create_nsg: true
   vnet:
@@ -143,7 +143,7 @@ queues:
     max_hours: 12
     min_hours: 1
 image_gallery:
-  create: false
+  create: true
 
 images:
   - name: base-ubuntu-20_04-v2-rdma-gpgpu
