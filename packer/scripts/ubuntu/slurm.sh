@@ -10,8 +10,8 @@ mkdir -p $BUILD_DIR
 #
 # Build PMIx
 #
-apt-get update
-apt-get install -y git git libevent-dev libhwloc-dev autoconf flex make gcc libxml2
+sudo apt-get update
+sudo apt-get install -y git git libevent-dev libhwloc-dev autoconf flex make gcc libxml2
 
 cd $BUILD_DIR
 mkdir -p /opt/pmix/v4
