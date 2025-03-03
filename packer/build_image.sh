@@ -72,7 +72,8 @@ fi
 # Determine image name from the packer file
 image_name=$(basename "$PACKER_FILE")
 image_name="${image_name%.*}"
-resource_group="automated-image-build-rg"
+# Use the correct resource group (as per build output)
+resource_group="dev-apqx-azhop-rg"
 
 # Generate install script checksum
 set +e
@@ -104,7 +105,7 @@ fi
 # Build a new image if the image does not exist (or was deleted) or FORCE is set
 if [ -z "$image_id" ] || [ $FORCE -eq 1 ]; then
   logfile="${PACKER_FILE%.*}.log"
-
+  
   # Determine cloud environment
   cloud_env="Public"
   account_env=$(az account show | jq -r '.environmentName')
@@ -119,16 +120,16 @@ if [ -z "$image_id" ] || [ $FORCE -eq 1 ]; then
       cloud_env="Public"
       ;;
   esac
-
+  
   echo "Building/Rebuilding $image_name in $resource_group (log: $logfile)"
   key_vault_name=$(yq eval ".key_vault" "$ANSIBLE_VARIABLES")
-
+  
   echo "Removing OS disk if any..."
   os_disk_id=$(az disk list -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
   if [ -n "$os_disk_id" ]; then
     az disk delete --ids "$os_disk_id" -o tsv -y
   fi
-
+  
   packer plugins install github.com/hashicorp/azure
   
   packer build $PACKER_OPTIONS -var-file "$OPTIONS_FILE" \
@@ -156,7 +157,20 @@ else
   echo "Image $image_name exists, skipping build."
 fi
 
-sig_name="aps_image_gallery"
+# --- Ensure Image Gallery Exists with a Unique Name ---
+base_gallery_name="aps_image_gallery"
+# Check if the gallery exists in the resource group
+existing_gallery=$(az sig gallery list -g "$resource_group" --query "[?name=='$base_gallery_name'].name" -o tsv)
+if [ -z "$existing_gallery" ]; then
+  # Create a unique gallery name by appending a UTC timestamp
+  timestamp=$(date -u +"%Y%m%d%H%M%S")
+  sig_name="${base_gallery_name}-${timestamp}"
+  echo "Image gallery not found. Creating new image gallery: $sig_name"
+  az sig gallery create --resource-group "$resource_group" --gallery-name "$sig_name" --location eastus --description "Gallery created by build_image.sh"
+else
+  sig_name="$base_gallery_name"
+  echo "Image gallery $sig_name exists."
+fi
 
 # Create the image definition in the SIG if it doesn't exist
 img_def_id=$(az sig image-definition list -r "$sig_name" -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
@@ -189,7 +203,7 @@ fi
 image_id=$(az image list -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
 image_version=$(az image show --id "$image_id" --query "tags.Version" -o tsv)
 echo "Looking for image $image_name version $image_version ..."
-img_version_id=$(az sig image-version list  -r "$sig_name" -i "$image_name" -g "$resource_group" --query "[?name=='$image_version'].id" -o tsv)
+img_version_id=$(az sig image-version list -r "$sig_name" -i "$image_name" -g "$resource_group" --query "[?name=='$image_version'].id" -o tsv)
 
 if [ -z "$img_version_id" ] || [ $FORCE -eq 1 ]; then
   # Image version is YYY.MMDD.HHMM
