@@ -102,7 +102,6 @@ if [ -n "$image_id" ] && [ $FORCE -eq 1 ]; then
   image_id=""
 fi
 
-
 # Build a new image if the image does not exist (or was deleted) or FORCE is set
 if [ -z "$image_id" ] || [ $FORCE -eq 1 ]; then
   logfile="${PACKER_FILE%.*}.log"
@@ -159,7 +158,6 @@ else
 fi
 
 # --- Ensure Image Gallery Exists with a Unique Name ---
-# --- Ensure Image Gallery Exists with a Unique Name ---
 base_gallery_name="aps_image_gallery"
 # Check if a gallery with the base name exists in the resource group
 existing_gallery=$(az sig gallery list --resource-group "$resource_group" --query "[?name=='$base_gallery_name'].name" -o tsv)
@@ -179,9 +177,8 @@ else
   echo "Image gallery $sig_name exists."
 fi
 
-
-# Create the image definition in the SIG if it doesn't exist
-img_def_id=$(az sig image-definition list -r "$sig_name" -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
+# --- Create the Image Definition in the SIG if it doesn't exist ---
+img_def_id=$(az sig image-definition list --resource-group "$resource_group" --gallery-name "$sig_name" --query "[?name=='$image_name'].id" -o tsv)
 if [ -z "$img_def_id" ]; then
   echo "Creating an image definition for $image_name"
   echo "Reading image definition from $CONFIG_FILE"
@@ -199,47 +196,14 @@ if [ -z "$img_def_id" ]; then
   eval_str=".images[] | select(.name == "\"$image_name"\") | .os_type"
   os_type=$(yq eval "$eval_str" "$CONFIG_FILE")
   
-  az sig image-definition create -r "$sig_name" -i "$image_name" -g "$resource_group" \
-                -f "$offer" --os-type "$os_type" -p "$publisher" -s "$sku" --hyper-v-generation "$hyper_v" \
-                --query 'id' -o tsv
-  img_def_id=$(az sig image-definition list -r "$sig_name" -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
-else
-  echo "Image definition for $image_name found in gallery $sig_name"
-fi
-
-# Check if the managed image version exists in the SIG; if not, push a new version
-image_id=$(az image list -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
-image_version=$(az image show --id "$image_id" --query "tags.Version" -o tsv)
-echo "Looking for image $image_name version $image_version ..."
-img_version_id=$(az sig image-version list -r "$sig_name" -i "$image_name" -g "$resource_group" --query "[?name=='$image_version'].id" -o tsv)
-
-if [ -z "$img_version_id" ] || [ $FORCE -eq 1 ]; then
-  # Image version is YYY.MMDD.HHMM
-  version=$(date -u +"%Y.%m%d.%H%M")
-  echo "Pushing version $version of $image_name in $sig_name"
-  
-  storage_type=$(az image show --id "$image_id" --query "storageProfile.osDisk.storageAccountType" -o tsv)
-  location=$(jq -r '.var_location' "$OPTIONS_FILE")
-  
-  az sig image-version create \
-    --resource-group "$resource_group" \
+  az sig image-definition create \
     --gallery-name "$sig_name" \
+    --resource-group "$resource_group" \
     --gallery-image-definition "$image_name" \
-    --gallery-image-version "$version" \
-    --storage-account-type "$storage_type" \
-    --location "$location" \
-    --replica-count 1 \
-    --managed-image "$image_id" \
-    -o tsv
-  
-  echo "Tagging the source image with version $version and checksum $packer_md5"
-  az image update --ids "$image_id" --tags Version="$version" checksum="$packer_md5" -o tsv
-  
-  if [ "$KEEP_OS_DISK" == "true" ]; then
-    echo "Tagging the OS disk with version $version"
-    os_disk_id=$(az disk list -g "$resource_group" --query "[?name=='$image_name'].id" -o tsv)
-    az disk update --ids "$os_disk_id" --set tags.'Version'="$version" -o tsv
-  fi
-else
-  echo "Image $image_name version $image_version found in gallery $sig_name"
-fi
+    --offer "$offer" \
+    --os-type "$os_type" \
+    --publisher "$publisher" \
+    --sku "$sku" \
+    --hyper-v-generation "$hyper_v" \
+    --query 'id' -o tsv
+  img_def_id=$(az sig image-definition list --resource-group "$resource_group" --gallery-name "$sig_name" --query "[?name=
