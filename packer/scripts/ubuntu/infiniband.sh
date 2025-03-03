@@ -16,7 +16,7 @@ sed -i 's/FORCE_MODE.*$/FORCE_MODE=yes/' /etc/infiniband/openib.conf
 #
 
 echo "Installing rdma_rename service..."
-apt-get install -y git cmake gcc ninja-build make libnl-3-dev libnl-3-200
+sudo apt-get install -y git cmake gcc ninja-build make libnl-3-dev libnl-3-200
 
 pushd /tmp
 rdma_core_branch=stable-v34
