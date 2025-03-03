@@ -1,6 +1,6 @@
 ---
 - hosts: scheduler
-  gather_facts: no
+  gather_facts: false
   become: true
   vars_files:
     - '{{global_config_file}}'
