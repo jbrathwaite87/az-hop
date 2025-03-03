@@ -9,7 +9,7 @@ set -o pipefail
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 OPTIONS_FILE=options.json
 FORCE=0
-SPN_FILE=spn.json
+#SPN_FILE=spn.json
 CONFIG_FILE=../config.yml
 ANSIBLE_VARIABLES=../playbooks/group_vars/all.yml
 
