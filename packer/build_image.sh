@@ -98,9 +98,10 @@ fi
 # If FORCE is set and an image exists, delete it before building a new one
 if [ -n "$image_id" ] && [ $FORCE -eq 1 ]; then
   echo "Force flag is set. Deleting existing managed image: $image_name"
-  az image delete --ids "$image_id" -o tsv -y
+  az image delete --ids "$image_id" -o tsv
   image_id=""
 fi
+
 
 # Build a new image if the image does not exist (or was deleted) or FORCE is set
 if [ -z "$image_id" ] || [ $FORCE -eq 1 ]; then
