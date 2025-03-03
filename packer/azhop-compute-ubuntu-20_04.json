@@ -3,6 +3,7 @@
         {
             "type": "azure-arm",
             "use_azure_cli_auth": "{{user `var_use_azure_cli_auth`}}",
+            "subscription_id": "304c6bf4-26c3-4328-afc5-4b79879826b7",
             "image_publisher": "microsoft-dsvm",
             "image_offer": "ubuntu-hpc",
             "image_sku": "2004",
