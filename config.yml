@@ -57,7 +57,7 @@ private_dns:
   registration_enabled: true
 locked_down_network:
   public_ip: true
-linux_base_image: 'almalinux:almalinux-x86_64:8-gen2:8.10.2024082001'
+linux_base_image: '/subscriptions/304c6bf4-26c3-4328-afc5-4b79879826b7/resourceGroups/DEV-APQX-AZHOP-RG/providers/Microsoft.Compute/images/azhop-compute-ubuntu-20_04'
 windows_base_image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter-smalldisk:latest'
 jumpbox:
   vm_size: Standard_D2as_v4
