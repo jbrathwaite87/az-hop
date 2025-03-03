@@ -2,29 +2,20 @@
     "builders": [
         {
             "type": "azure-arm",
-            "use_azure_cli_auth": "{{user `var_use_azure_cli_auth`}}",
-            "image_publisher": "canonical",
-            "image_offer": "0001-com-ubuntu-server-focal",
-            "image_sku": "20_04-lts-gen2",
-            "image_version": "latest",
-            "custom_data_file" : "./scripts/cloud_init.yml",
+            "use_msi": true,
+            "subscription_id": "934518a9-05c3-4758-a33b-74dd9a1c56da",
             "managed_image_resource_group_name": "{{user `var_resource_group`}}",
             "managed_image_name": "{{user `var_image`}}",
             "os_type": "Linux",
             "vm_size": "Standard_HB120rs_v3",
             "os_disk_size_gb": "128",
             "managed_image_storage_account_type": "Premium_LRS",
-            "ssh_pty": "true",
             "build_resource_group_name": "{{user `var_resource_group`}}",
             "private_virtual_network_with_public_ip": "{{user `var_private_virtual_network_with_public_ip`}}",
             "virtual_network_name": "{{user `var_virtual_network_name`}}",
             "virtual_network_subnet_name": "{{user `var_virtual_network_subnet_name`}}",
             "virtual_network_resource_group_name": "{{user `var_virtual_network_resource_group_name`}}",
-            "cloud_environment_name": "{{user `var_cloud_env`}}",
-            "ssh_bastion_host": "{{user `var_ssh_bastion_host`}}",
-            "ssh_bastion_port": "{{user `var_ssh_bastion_port`}}",
-            "ssh_bastion_username": "{{user `var_ssh_bastion_username`}}",
-            "ssh_bastion_private_key_file": "{{user `var_ssh_bastion_private_key_file`}}"
+            "cloud_environment_name": "{{user `var_cloud_env`}}"
         }
     ],
     "provisioners": [
@@ -34,7 +25,7 @@
             "destination": "/tmp"
         },
         {
-            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+            "type": "shell",
             "inline": [
                 "chmod +x /tmp/*.sh",
                 "/tmp/hpc_image.sh || exit 1",
@@ -46,7 +37,6 @@
                 "export HISTSIZE=0 && sync"
             ],
             "inline_shebang": "/bin/sh -x",
-            "type": "shell",
             "skip_clean": true
         }
     ]
