@@ -1,6 +1,6 @@
-project_name: dev-apqx-hpc
+project_name: d-apqx-hpc
 location: eastus
-resource_group: dev-apqx-azhop-rg
+resource_group: d-apqx-azhop-rg
 anf:
   create: true
   homefs_size_tb: 4
