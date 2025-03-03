@@ -16,10 +16,10 @@
             "virtual_network_subnet_name": "{{user `var_virtual_network_subnet_name`}}",
             "virtual_network_resource_group_name": "{{user `var_virtual_network_resource_group_name`}}",
             "cloud_environment_name": "{{user `var_cloud_env`}}",
-            "image_publisher": "microsoft-dsvm",
-            "image_offer": "ubuntu-2004",
-            "image_sku": "2004-gen2",
-            "image_version": "25.02.13"
+            "image_publisher": "azhpc",
+            "image_offer": "azhop-compute",
+            "image_sku": "ubuntu-20_04",
+            "image_version": "2024.0305.1320"
         }
     ],
     "provisioners": [
