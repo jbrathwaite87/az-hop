@@ -40,11 +40,6 @@ yamllint $CONFIG_FILE
 
 PACKER_OPTIONS="-timestamp-ui"
 KEEP_OS_DISK="false"
-# Add this near the beginning of the script, where other parameters are defined
-SUBSCRIPTION_ID="304c6bf4-26c3-4328-afc5-4b79879826b7"
-echo "Authenticating using the Managed Identity..."
-az login --identity
-az account set --subscription $SUBSCRIPTION_ID
 
 while (( "$#" )); do
   case "${1}" in
