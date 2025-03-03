@@ -44,16 +44,7 @@ KEEP_OS_DISK="false"
 SUBSCRIPTION_ID="28e0028b-80b0-4f69-9c1a-372ce4df4e42"
 echo "Authenticating using the Managed Identity..."
 az login --identity
-
-# If no subscription ID is provided, get the current one
-if [ -z "$SUBSCRIPTION_ID" ]; then
-  SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-  echo "Using current subscription: $SUBSCRIPTION_ID"
-else
-  # Set the specified subscription as active
-  echo "Setting subscription to: $SUBSCRIPTION_ID"
-  az account set --subscription "$SUBSCRIPTION_ID"
-fi
+az account set --subscription $SUBSCRIPTION_ID
 
 while (( "$#" )); do
   case "${1}" in
