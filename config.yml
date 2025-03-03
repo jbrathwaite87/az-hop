@@ -74,6 +74,8 @@ scheduler:
   vm_size: Standard_D8as_v4
 cyclecloud:
   vm_size: Standard_D4as_v4
+  image: azhpc:azhop-compute:ubuntu-20_04:2024.0305.1320
+  plan: azhpc:azhop-compute:ubuntu-20_04
 users:
   - name: clusteradmin
     uid: 10001
