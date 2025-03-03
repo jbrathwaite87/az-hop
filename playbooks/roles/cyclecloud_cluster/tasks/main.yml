@@ -1,53 +1,66 @@
 ---
-- name: Include distribution variables
-  block:
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: Ensure jq is installed (for Debian/Ubuntu)
+      apt:
+        name: jq
+        state: present
+      when: ansible_os_family == 'Debian'
+      tags: [ 'prerequisites' ]
+
+    - name: Ensure jq is installed (for RHEL/CentOS)
+      yum:
+        name: jq
+        state: present
+      when: ansible_os_family == 'RedHat'
+      tags: [ 'prerequisites' ]
+
     - name: Include distribution variables
-      ansible.builtin.include_vars: "{{ item }}"
-      with_first_found:
-        - "{{ role_path }}/vars/{{ ansible_distribution }}/{{ ansible_distribution_major_version }}.yml"
-        - "{{ role_path }}/vars/{{ ansible_distribution }}.yml"
+      block:
+        - name: Include distribution variables
+          ansible.builtin.include_vars: "{{ item }}"
+          with_first_found:
+            - "{{ role_path }}/vars/{{ ansible_distribution }}/{{ ansible_distribution_major_version }}.yml"
+            - "{{ role_path }}/vars/{{ ansible_distribution }}.yml"
+          tags: [ 'always' ]
+      rescue:
+        - name: Change error message
+          ansible.builtin.fail:
+            msg: "unable to find anything in vars/ for this operating system! {{ ansible_distribution }}"
 
-      tags: [ 'always' ]
-  rescue:
-    - name: Change error message
-      ansible.builtin.fail:
-        msg: "unable to find anything in vars/ for this operating system! {{ ansible_distribution }}"
+    - name: Create common project
+      include_tasks: common.yml
 
-- name: Create common project
-  include_tasks: common.yml
+    - name: Create {{ cc_queue_manager }} project
+      include_tasks: '{{ cc_queue_manager }}.yml'
 
-- name: Create {{cc_queue_manager}} project
-  include_tasks: '{{cc_queue_manager}}.yml'
-
-- name: Populate cluster-init for enroot/pyxis
-  block:
-    - name: Create enroot project
-      command: '/usr/local/bin/cyclecloud project init enroot'
-      args:
-        chdir: '{{project_root}}'
-        creates: '{{enroot_project_root}}/project.ini'
-    - name: Create install_pyxis.sh
-      template:
-        src: '{{role_path}}/projects/enroot/cluster-init/scripts/1-install_pyxis.sh.j2'
-        dest: '{{enroot_project_root}}/specs/default/cluster-init/scripts/1-install_pyxis.sh'
-        mode: 0777
-      when: cc_queue_manager == "slurm"
-
-    - name: Create install_enroot.sh
-      template:
-        src: '{{role_path}}/projects/enroot/cluster-init/scripts/2-install_enroot.sh.j2'
-        dest: '{{enroot_project_root}}/specs/default/cluster-init/scripts/2-install_enroot.sh'
-        mode: 0777
-
-    - name: Create 3-pmix.sh
-      template:
-        src: '{{role_path}}/projects/enroot/cluster-init/scripts/3-pmix.sh.j2'
-        dest: '{{enroot_project_root}}/specs/default/cluster-init/scripts/3-pmix.sh'
-        mode: 0777
-      when: cc_queue_manager == "slurm"
-
-    - name: Upload enroot CycleCloud project
-      command: '/usr/local/bin/cyclecloud project upload'
-      args:
-        chdir: '{{enroot_project_root}}'
-
+    - name: Populate cluster-init for enroot/pyxis
+      block:
+        - name: Create enroot project
+          command: '/usr/local/bin/cyclecloud project init enroot'
+          args:
+            chdir: '{{ project_root }}'
+            creates: '{{ enroot_project_root }}/project.ini'
+        - name: Create install_pyxis.sh
+          template:
+            src: '{{ role_path }}/projects/enroot/cluster-init/scripts/1-install_pyxis.sh.j2'
+            dest: '{{ enroot_project_root }}/specs/default/cluster-init/scripts/1-install_pyxis.sh'
+            mode: '0777'
+          when: cc_queue_manager == "slurm"
+        - name: Create install_enroot.sh
+          template:
+            src: '{{ role_path }}/projects/enroot/cluster-init/scripts/2-install_enroot.sh.j2'
+            dest: '{{ enroot_project_root }}/specs/default/cluster-init/scripts/2-install_enroot.sh'
+            mode: '0777'
+        - name: Create 3-pmix.sh
+          template:
+            src: '{{ role_path }}/projects/enroot/cluster-init/scripts/3-pmix.sh.j2'
+            dest: '{{ enroot_project_root }}/specs/default/cluster-init/scripts/3-pmix.sh'
+            mode: '0777'
+          when: cc_queue_manager == "slurm"
+        - name: Upload enroot CycleCloud project
+          command: '/usr/local/bin/cyclecloud project upload'
+          args:
+            chdir: '{{ enroot_project_root }}'
