@@ -10,7 +10,7 @@ sudo apt-get install -y git
 
 cd /mnt/
 
-git clone https://github.com/Azure/azhpc-images
+git clone https://github.com/Azure/azhpc-images.git
 
 sed -i 's/azcopyvnext.azureedge/azcopyvnext-awgzd8g7aagqhzhe.b02.azurefd/g' ./azhpc-images/common/install_azcopy.sh
 
