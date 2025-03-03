@@ -114,7 +114,7 @@ queues:
   - name: hpc
     vm_size: Standard_HB120-64rs_v3 #Standard_HB176-48rs_v4
     max_core_count: 1000
-    image: 'azhpc:azhop-compute:almalinux-8_10:2024.1209.1326'
+    image: '/subscriptions/304c6bf4-26c3-4328-afc5-4b79879826b7/resourceGroups/DEV-APQX-AZHOP-RG/providers/Microsoft.Compute/images/azhop-compute-ubuntu-20_04'
     EnableAcceleratedNetworking: true
   - name: viz3d
     vm_size: Standard_NC8as_T4_v3
@@ -154,18 +154,18 @@ images:
 
 applications:
   bc_codeserver:
-    enabled: true
+    enabled: false
   bc_jupyter:
-    enabled: true
+    enabled: false
   bc_amlsdk:
     enabled: false
   bc_rstudio:
     enabled: false
   bc_ansys_workbench:
-    enabled: true
+    enabled: false
   bc_vmd:
     enabled: false
   bc_paraview:
-    enabled: true
+    enabled: false
   bc_vizer:
     enabled: false
