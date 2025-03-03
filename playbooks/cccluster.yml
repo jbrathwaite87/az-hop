@@ -7,7 +7,7 @@
 - name: Setup cyclecloud
   hosts: ccportal
   become: true
-  gather_facts: no
+  gather_facts: false
   vars:
     lookup_img_file: image_lookup.yml
   vars_files:
