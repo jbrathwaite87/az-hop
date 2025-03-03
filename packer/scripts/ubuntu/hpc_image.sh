@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
 # Update packages 
-apt-get clean
-apt-get update 
+sudo apt-get clean
+sudo apt-get update -y
+
 
 # Install git using ubuntu 
-apt-get install -y git 
+sudo apt-get install -y git 
 
 cd /mnt/
 
