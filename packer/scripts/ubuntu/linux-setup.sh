@@ -6,9 +6,9 @@ echo " *                                                                        
 echo " ********************************************************************************** "
 packages="nfs-common sssd libsss-simpleifp0 sssd-dbus sssd-tools realmd oddjob oddjob-mkhomedir adcli samba-common krb5-user ldap-utils packagekit resolvconf jq chrony netcat"
 
-apt-get clean -y
-apt-get autoremove -y
-apt -y update
+sudo apt-get clean -y
+sudo apt-get autoremove -y
+sudo apt -y update
 # this export is needed to stop input for krb5-user
 export DEBIAN_FRONTEND=noninteractive
 apt-get install -y $packages
