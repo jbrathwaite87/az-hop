@@ -1,5 +1,14 @@
 #cloud-config
-# Add your cloud init script here to customize the instance before running the installation scripts
-#runcmd:
-# - echo AllowUsers packer >> /etc/ssh/sshd_config
-# - systemctl restart sshd
+users:
+  - name: packer
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    groups: sudo
+
+runcmd:
+  - echo 'AllowUsers packer' >> /etc/ssh/sshd_config
+  - systemctl restart sshd
+  - echo 'packer ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/packer
+  - chmod 0440 /etc/sudoers.d/packer
+  - sudo apt-get update -y
+  - sudo apt-get upgrade -y
