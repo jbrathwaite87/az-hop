@@ -364,10 +364,10 @@
           AllowUsers *
 
   - name: Ensure rsync is installed
-  package:
-    name: rsync
-    state: present
-  become: true
+    package:
+      name: rsync
+      state: present
+    become: true
 
   - name: Copy rsync systemd service file
     copy:
