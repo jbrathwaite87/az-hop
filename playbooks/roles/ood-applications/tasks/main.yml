@@ -5,7 +5,6 @@
       - git
       - rsync
       - mpi
-      - xorg-x11-server-Xvfb
       - xauth
       - libX11
       - libXtst
