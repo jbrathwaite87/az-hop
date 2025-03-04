@@ -1,7 +1,3 @@
- vars:
-    # Use the absolute path to the SSH key file located in the repo root.
-    ansible_ssh_private_key_file: "{{ playbook_dir }}/hpcadmin_id_rsa"
-    
 - name: Ensure required dependencies are installed
   package:
     name:
