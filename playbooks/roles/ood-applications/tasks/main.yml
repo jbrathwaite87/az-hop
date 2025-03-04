@@ -1,31 +1,49 @@
 ---
-- name: Install Git
+- name: Ensure required dependencies are installed
   package:
-    name: git
+    name:
+      - git
+      - rsync
+      - mpi
+      - mesa
+      - xorg-x11-server-Xvfb
+      - xauth
+      - libX11
+      - libXtst
+      - libXrandr
     state: present
   become: true
-  
+
+- name: Load MPI module (mvapich2)
+  shell: |
+    module load mpi/mvapich2 || echo "MPI module not found"
+  args:
+    executable: /bin/bash
+  changed_when: false
+
 - name: Perform OS dependent configuration tasks
-  include_tasks: "{{ansible_distribution}}.yml"
+  include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: Create or remove application directories
   file:
     path: "{{ ood_sys_app_dir }}/{{ item.name }}"
-    state: "{{'directory' if item.enabled else 'absent'}}"
+    state: "{{ 'directory' if item.enabled else 'absent' }}"
     mode: 0755
-  loop: '{{ood_azhop_apps}}'
+  loop: "{{ ood_azhop_apps }}"
   when: item.name != 'dashboard'
 
-- name: Copy application files
-  copy:
-    src: '{{role_path}}/files/{{ item.name }}'
-    dest: /var/www/ood/apps/sys/
-    mode: 0755
+- name: Synchronize application files using rsync
+  synchronize:
+    src: "{{ role_path }}/files/{{ item.name }}/"
+    dest: /var/www/ood/apps/sys/{{ item.name }}/
+    delete: yes
+    rsync_opts:
+      - "--exclude=.git"
   when: item.enabled
-  loop: '{{ood_azhop_apps}}'
+  loop: "{{ ood_azhop_apps }}"
 
-- name: update grafana config
-  command: sed -i 's/__GRAFANA__/{{grafana.name | default("grafana")}}/g' /var/www/ood/apps/sys/grafana/app.py
+- name: Update Grafana config
+  command: sed -i 's/__GRAFANA__/{{ grafana.name | default("grafana") }}/g' /var/www/ood/apps/sys/grafana/app.py
   when: monitoring.grafana | default(true)
 
 - name: Initialize application
@@ -33,11 +51,11 @@
     path: /var/lib/ondemand-nginx/config/apps/sys/{{ item.name }}.conf
     state: touch
   when: item.enabled and (item.initialized | default(false))
-  loop: '{{ood_azhop_apps}}'
+  loop: "{{ ood_azhop_apps }}"
 
-- name: update nginx stage
+- name: Update nginx stage
   shell: |
-      /opt/ood/nginx_stage/sbin/update_nginx_stage &>/dev/null || :
+    /opt/ood/nginx_stage/sbin/update_nginx_stage &>/dev/null || :
 
 - name: Install ParaView files
   include_tasks: paraview.yml
