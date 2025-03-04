@@ -1,76 +1,81 @@
-- name: Ensure required dependencies are installed
-  package:
-    name:
-      - git
-      - mpi
-      - xauth
-    state: present
+---
+- hosts: ondemand
   become: true
+  vars:
+    # Use the absolute path to the SSH key file located in the repo root.
+    ansible_ssh_private_key_file: "{{ playbook_dir }}/hpcadmin_id_rsa"
 
-- name: Load MPI module (mvapich2)
-  shell: |
-    module load mpi/mvapich2 || echo "MPI module not found"
-  args:
-    executable: /bin/bash
-  changed_when: false
+  tasks:
+    - name: Ensure required dependencies are installed
+      package:
+        name:
+          - git
+          - mpi
+          - xauth
+        state: present
 
-- name: Perform OS dependent configuration tasks
-  include_tasks: "{{ ansible_distribution }}.yml"
+    - name: Load MPI module (mvapich2)
+      shell: |
+        module load mpi/mvapich2 || echo "MPI module not found"
+      args:
+        executable: /bin/bash
+      changed_when: false
 
-- name: Ensure rsync is installed
-  package:
-    name: rsync
-    state: present
-  become: true
+    - name: Perform OS dependent configuration tasks
+      include_tasks: "{{ ansible_distribution }}.yml"
 
-- name: Verify rsync installation
-  command: which rsync
-  register: rsync_path
-  become: true
+    - name: Ensure rsync is installed
+      package:
+        name: rsync
+        state: present
 
-- debug:
-    msg: "rsync found at: {{ rsync_path.stdout }}"
+    - name: Verify rsync installation
+      command: which rsync
+      register: rsync_path
 
-- name: Create or remove application directories
-  file:
-    path: "{{ ood_sys_app_dir }}/{{ item.name }}"
-    state: "{{ 'directory' if item.enabled else 'absent' }}"
-    mode: 0755
-  loop: "{{ ood_azhop_apps }}"
-  when: item.name != 'dashboard'
+    - debug:
+        msg: "rsync found at: {{ rsync_path.stdout }}"
 
-- name: Synchronize application files using rsync
-  synchronize:
-    src: "{{ role_path }}/files/{{ item.name }}/"
-    dest: /var/www/ood/apps/sys/{{ item.name }}/
-    delete: yes
-    rsync_opts:
-      - "--exclude=.git"
-    rsync_path: /usr/bin/rsync
-  when: item.enabled
-  loop: "{{ ood_azhop_apps }}"
+    - name: Create or remove application directories
+      file:
+        path: "{{ ood_sys_app_dir }}/{{ item.name }}"
+        state: "{{ 'directory' if item.enabled else 'absent' }}"
+        mode: 0755
+      loop: "{{ ood_azhop_apps }}"
+      when: item.name != 'dashboard'
 
-- name: Update Grafana config
-  command: sed -i 's/__GRAFANA__/{{ grafana.name | default("grafana") }}/g' /var/www/ood/apps/sys/grafana/app.py
-  when: monitoring.grafana | default(true)
+    - name: Synchronize application files using rsync
+      synchronize:
+        src: "{{ role_path }}/files/{{ item.name }}/"
+        dest: /var/www/ood/apps/sys/{{ item.name }}/
+        delete: yes
+        rsync_opts:
+          - "--exclude=.git"
+        rsync_path: /usr/bin/rsync
+      when: item.enabled
+      loop: "{{ ood_azhop_apps }}"
 
-- name: Initialize application
-  file:
-    path: /var/lib/ondemand-nginx/config/apps/sys/{{ item.name }}.conf
-    state: touch
-  when: item.enabled and (item.initialized | default(false))
-  loop: "{{ ood_azhop_apps }}"
+    - name: Update Grafana config
+      command: sed -i 's/__GRAFANA__/{{ grafana.name | default("grafana") }}/g' /var/www/ood/apps/sys/grafana/app.py
+      when: monitoring.grafana | default(true)
 
-- name: Update nginx stage
-  shell: |
-    /opt/ood/nginx_stage/sbin/update_nginx_stage &>/dev/null || :
+    - name: Initialize application
+      file:
+        path: /var/lib/ondemand-nginx/config/apps/sys/{{ item.name }}.conf
+        state: touch
+      when: item.enabled and (item.initialized | default(false))
+      loop: "{{ ood_azhop_apps }}"
 
-- name: Install ParaView files
-  include_tasks: paraview.yml
-  tags: [ 'paraview' ]
-  when: applications.bc_paraview.enabled | default(false)
+    - name: Update nginx stage
+      shell: |
+        /opt/ood/nginx_stage/sbin/update_nginx_stage &>/dev/null || :
 
-- name: Install sample datasets files (vizer)
-  include_tasks: vizer.yml
-  tags: [ 'vizer' ]
-  when: applications.bc_vizer.enabled | default(false)
+    - name: Install ParaView files
+      include_tasks: paraview.yml
+      tags: [ 'paraview' ]
+      when: applications.bc_paraview.enabled | default(false)
+
+    - name: Install sample datasets files (vizer)
+      include_tasks: vizer.yml
+      tags: [ 'vizer' ]
+      when: applications.bc_vizer.enabled | default(false)
