@@ -22,6 +22,13 @@
       timeout: 300
   - name: Gather facts for first time
     setup:
+  - name: ENsure rsync is installed
+    block:
+      - name: Install rsync
+        package:
+          name: rsync
+          state: present
+    become: true
 
   - name: set httpd_auth values when using basic auth
     block:
