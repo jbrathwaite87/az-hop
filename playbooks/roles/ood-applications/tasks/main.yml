@@ -6,9 +6,6 @@
       - rsync
       - mpi
       - xauth
-      - libX11
-      - libXtst
-      - libXrandr
     state: present
   become: true
 
