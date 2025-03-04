@@ -13,3 +13,18 @@
     dest: /etc/ood/config/nginx_stage.yml
     regexp: "^#passenger_python|^passenger_python"
     line: "passenger_python: '/usr/bin/python3'"
+
+- name: Ensure rsync is installed
+  package:
+    name: rsync
+    state: present
+  become: true
+
+- name: Verify rsync installation
+  command: which rsync
+  register: rsync_path
+  become: true
+
+- debug:
+    msg: "rsync found at: {{ rsync_path.stdout }}"
+
