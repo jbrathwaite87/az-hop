@@ -166,10 +166,10 @@ applications:
   bc_rstudio:
     enabled: false
   bc_ansys_workbench:
-    enabled: false
+    enabled: true
   bc_vmd:
     enabled: false
   bc_paraview:
-    enabled: false
+    enabled: true
   bc_vizer:
     enabled: false
