@@ -1,5 +1,10 @@
 ---
-
+- name: Install Git
+  package:
+    name: git
+    state: present
+  become: true
+  
 - name: Perform OS dependent configuration tasks
   include_tasks: "{{ansible_distribution}}.yml"
 
