@@ -1,4 +1,3 @@
----
 - name: Ensure required dependencies are installed
   package:
     name:
@@ -18,6 +17,20 @@
 - name: Perform OS dependent configuration tasks
   include_tasks: "{{ ansible_distribution }}.yml"
 
+- name: Ensure rsync is installed
+  package:
+    name: rsync
+    state: present
+  become: true
+
+- name: Verify rsync installation
+  command: which rsync
+  register: rsync_path
+  become: true
+
+- debug:
+    msg: "rsync found at: {{ rsync_path.stdout }}"
+
 - name: Create or remove application directories
   file:
     path: "{{ ood_sys_app_dir }}/{{ item.name }}"
@@ -33,6 +46,7 @@
     delete: yes
     rsync_opts:
       - "--exclude=.git"
+    rsync_path: /usr/bin/rsync
   when: item.enabled
   loop: "{{ ood_azhop_apps }}"
 
