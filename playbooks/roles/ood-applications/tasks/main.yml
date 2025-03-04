@@ -3,7 +3,6 @@
   package:
     name:
       - git
-      - rsync
       - mpi
       - xauth
     state: present
