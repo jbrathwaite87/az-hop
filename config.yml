@@ -59,7 +59,7 @@ locked_down_network:
   public_ip: true
 linux_base_image: canonical:0001-com-ubuntu-pro-focal:pro-20_04-lts-gen2:20.04.202502181 #canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:22.04.202502280
 #linux image plan if required, format is publisher:product:name
-#linux_base_plan: 'canonical:0001-com-ubuntu-server-jammy:22_04-lts-ARM'
+linux_base_plan: 'canonical:0001-com-ubuntu-pro-focal:pro-20_04-lts-gen2'
 windows_base_image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter-smalldisk:latest
 jumpbox:
   vm_size: Standard_D2as_v4
