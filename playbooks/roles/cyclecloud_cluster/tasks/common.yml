@@ -10,10 +10,10 @@
     state: directory
 
 - name: Create common CycleCloud project
-  command: '/usr/local/bin/cyclecloud project init common'
+  command: '/usr/local/cyclecloud-cli/bin/cyclecloud project init common'
   args:
-    chdir: '{{project_root}}'
-    creates: '{{common_project_root}}/project.ini'
+    chdir: '{{ project_root }}'
+    creates: '{{ common_project_root }}/project.ini'
 
 - name: Copy common cluster-init files
   copy:
