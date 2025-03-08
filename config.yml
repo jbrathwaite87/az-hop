@@ -57,7 +57,7 @@ private_dns:
   registration_enabled: true
 locked_down_network:
   public_ip: true
-linux_base_image: canonical:0001-com-ubuntu-server-groovy:20_10-gen2:20.10.202107200 #'canonical:0001-com-ubuntu-minimal-focal-daily:minimal-20_04-daily-lts-gen2:20.04.202502040'
+linux_base_image: canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:20.04.202502181 #'canonical:0001-com-ubuntu-minimal-focal-daily:minimal-20_04-daily-lts-gen2:20.04.202502040'
 #linux image plan if required, format is publisher:product:name
 #linux_base_plan: 'azhpc:azhop-compute:ubuntu-20_04'
 windows_base_image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter-smalldisk:latest
