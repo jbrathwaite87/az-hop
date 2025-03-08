@@ -21,10 +21,10 @@
 - name: Populate cluster-init for enroot/pyxis
   block:
     - name: Create enroot project
-      command: '/usr/local/bin/cyclecloud project init enroot'
+      command: '/usr/local/cyclecloud-cli/bin/cyclecloud project init enroot'
       args:
-        chdir: '{{project_root}}'
-        creates: '{{enroot_project_root}}/project.ini'
+        chdir: '{{ project_root }}'
+        creates: '{{ enroot_project_root }}/project.ini'
     - name: Create install_pyxis.sh
       template:
         src: '{{role_path}}/projects/enroot/cluster-init/scripts/1-install_pyxis.sh.j2'
