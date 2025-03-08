@@ -31,7 +31,7 @@ admin_user: hpcadmin
 network:
   vnet:
     name: hpcvnet
-    address_space: "10.0.0.0/23" 
+    address_space: "10.0.0.0/20" 
     subnets:
     # All values below are the default values
       frontend:
@@ -44,6 +44,8 @@ network:
         address_prefixes: "10.0.0.8/29"
       compute:
         address_prefixes: "10.0.1.0/24"
+      bastion:
+        address_prefixes: "10.0.2.0/26
 private_dns:
   create: true
   name: hpc.azure
