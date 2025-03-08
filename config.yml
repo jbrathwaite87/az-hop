@@ -29,7 +29,9 @@ mounts:
 admin_user: hpcadmin
 # Network
 network:
-  name: hpcvnet
+  create_nsg: true
+  vnet:
+    name: hpcvnet
     address_space: 10.128.0.0/20
     subnets:
       frontend:
