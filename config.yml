@@ -16,7 +16,7 @@ mounts:
     options: '{{anf_home_opts}}'
 admin_user: hpcadmin
 azure_key_vault:
-  name: devapsazhopkv
+  name: apsdazhopkv
 azure_storage_account:
   name: devapsazhopsstg
 network:
