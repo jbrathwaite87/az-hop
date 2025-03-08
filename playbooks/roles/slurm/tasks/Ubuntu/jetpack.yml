@@ -14,11 +14,11 @@
       args:
         creates: /usr/share/keyrings/microsoft.gpg
 
-    - name: Add CycleCloud repo
+    - name: Add CycleCloud repository (bionic, since jammy is missing)
       copy:
         dest: /etc/apt/sources.list.d/cyclecloud.list
-        content: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/cyclecloud bionic main" | sudo tee /etc/apt/sources.list.d/cyclecloud.list"
-    
+        content: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/cyclecloud bionic main"
+
     - name: Update APT cache
       apt:
         update_cache: yes
@@ -31,12 +31,8 @@
 
 - name: Install dependencies
   apt:
-    name: jq
-    state: present
-
-- name: Ensure required Python packages are installed
-  apt:
     name:
+      - jq
       - python3.10
       - python3.10-venv
     state: present
