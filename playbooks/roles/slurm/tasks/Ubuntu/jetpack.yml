@@ -18,3 +18,11 @@
   apt:
     name: jq
     state: present
+- name: Ensure required Python packages are installed
+  apt:
+    name:
+      - python3.10
+      - python3.10-venv
+    state: present
+  become: yes
+
