@@ -73,7 +73,7 @@ rnode_uri: '/rnode'
 pun_pre_hook_root_cmd: /etc/ood/config/pun_pre_hook.sh
 
 pun_custom_env:
-  OOD_DASHBOARD_TITLE: "APQX HPC Platform"
+  OOD_DASHBOARD_TITLE: "Azure HPC On-Demand Platform"
   OOD_DASHBOARD_LOGO: "/public/logo.png"
   OOD_BRAND_BG_COLOR: "#0078d4"
   OOD_BRAND_LINK_ACTIVE_BG_COLOR: "#212529"

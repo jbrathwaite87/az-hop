@@ -1,25 +1,11 @@
 ---
-- name: Ensure jq is installed (for Debian/Ubuntu)
-  apt:
-    name: jq
-    state: present
-  when: ansible_os_family == 'Debian'
-  tags: [ 'prerequisites' ]
-
-- name: Ensure jq is installed (for RHEL/CentOS)
-  yum:
-    name: jq
-    state: present
-  when: ansible_os_family == 'RedHat'
-  tags: [ 'prerequisites' ]
 - name: Include distribution variables
   block:
     - name: Include distribution variables
       ansible.builtin.include_vars: "{{ item }}"
       with_first_found:
-        - "{{ role_path }}/vars/{{ ansible_distribution }}/{{ ansible_distribution_major_version }}.yml"
-        - "{{ role_path }}/vars/{{ ansible_distribution }}.yml"
-
+        - "{{ ansible_distribution }}/{{ ansible_distribution_major_version }}.yml"
+        - "{{ ansible_distribution }}.yml"
       tags: [ 'always' ]
   rescue:
     - name: Change error message
@@ -63,3 +49,4 @@
       command: '/usr/local/bin/cyclecloud project upload'
       args:
         chdir: '{{enroot_project_root}}'
+

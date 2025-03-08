@@ -7,7 +7,7 @@
 - name: Setup Cycle Cloud
   hosts: ccportal
   become: true
-  gather_facts: false
+  gather_facts: no
   vars_files:
     - '{{global_config_file}}'
   vars:

@@ -1,39 +1,42 @@
 ---
-- name: Install CycleCloud repo (Ubuntu)
-  block:
-    - name: Install prerequisites
-      apt:
-        name:
-          - wget
-          - gnupg2
-        state: present
+- name: Extract major and minor version from cycle
+  set_fact:
+    major_version: "{{ cc_version.split('-')[0].split('.')[0] | int }}"
+    minor_version: "{{ cc_version.split('-')[0].split('.')[1] | int }}"
 
-    - name: Add Microsoft GPG key
-      shell: |
-        wget -qO /usr/share/keyrings/microsoft.gpg https://packages.microsoft.com/keys/microsoft.asc
-      args:
-        creates: /usr/share/keyrings/microsoft.gpg
 
-    - name: Add CycleCloud repository (bionic, since jammy is missing)
-      copy:
-        dest: /etc/apt/sources.list.d/cyclecloud.list
-        content: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/cyclecloud bionic main"
+- name: install cyclecloud repo (Ubuntu)
+  shell: |
+    apt -y install wget gnupg2
+    wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+    echo 'deb https://packages.microsoft.com/repos/cyclecloud bionic main' > /etc/apt/sources.list.d/cyclecloud.list
+    sudo apt update
+  args:
+    creates: /etc/apt/sources.list.d/cyclecloud.list
 
-    - name: Update APT cache
-      apt:
-        update_cache: yes
+- name: Create Jetpack config directory (Ubuntu)
+  file: 
+    path: /opt/cycle/jetpack/config
+    state: directory
+    mode: 0750
+  when: 
+    - major_version | int > 8 or ( major_version | int == 8 and minor_version | int >= 6 )
+
+- name: Create Jetpack connection.json file (Ubuntu)
+  template:
+    src: 'connection.json.j2'
+    dest: /opt/cycle/jetpack/config/connection.json
+    mode: 0640
+  when:
+    - major_version | int > 8 or ( major_version | int == 8 and minor_version | int >= 6 )
 
 - name: Install Jetpack (Ubuntu)
-  apt:
-    name: "jetpack8={{ cc_version | default('latest') }}"
+  package:
+    name: "jetpack8={{cc_version}}"
     state: present
-    lock_timeout: 180
+    lock_timeout : 180
 
 - name: Install dependencies
   apt:
-    name:
-      - jq
-      - python3.10
-      - python3.10-venv
+    name: jq
     state: present
-  become: yes

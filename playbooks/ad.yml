@@ -2,13 +2,13 @@
 - name: prep socks tunnel
   hosts: localhost
   connection: local
-  gather_facts: false
+  gather_facts: no
   vars_files:
     - '{{global_config_file}}'
 
 - name: Configure AD Server
   hosts: ad
-  gather_facts: false
+  gather_facts: no
   vars_files:
     - '{{global_config_file}}'
 

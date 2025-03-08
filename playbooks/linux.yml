@@ -2,7 +2,7 @@
 - name: Configure Jumpbox
   hosts: jumpbox
   become: true
-  gather_facts: false
+  gather_facts: no
   vars_files:
     - '{{global_config_file}}'
   tasks:
@@ -28,7 +28,7 @@
 - name: Join AD domain or create local users, mount shared home
   hosts: scheduler, ondemand, grafana
   become: true
-  gather_facts: false
+  gather_facts: no
   vars_files:
     - '{{global_config_file}}'
 
@@ -120,7 +120,7 @@
 - name: Generate SSH keys on logon if not exists
   hosts: ondemand, scheduler
   become: true
-  gather_facts: false
+  gather_facts: no
   vars_files:
     - '{{global_config_file}}'
 

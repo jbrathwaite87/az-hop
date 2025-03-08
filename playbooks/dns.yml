@@ -1,7 +1,7 @@
 ---
 - name: Configure DNS records
   hosts: localhost
-  gather_facts: false
+  gather_facts: no
   vars_files:
     - '{{global_config_file}}'
 
