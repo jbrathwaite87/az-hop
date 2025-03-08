@@ -47,17 +47,6 @@
 ###
 ### Process checks
 ###
-### Note: PBS and SLURM daemons will be started after the healthcheck is triggered
-{% if queue_manager == "openpbs" or queue_manager is not defined %}
-{% endif %}
-
-{% if queue_manager == "slurm" and queue_manager is defined %}
-{% endif %}
-
-# Not present on Alma and Ubuntu
-# * || check_ps_service -S -u root crond
-# * || check_ps_service -r -d qmgr postfix
-# * || check_ps_service -S -u root sshd
 {% if ( monitoring.telegraf | default(true) ) %}
  * || check_ps_service -S -0 -u telegraf telegraf
 {% endif %}
@@ -76,28 +65,23 @@
 
 #######################################################################
 ###
-### Machine-specific hardware checks
-### This section is generated for each machine size defined in the variable "machine_sizes"
+### Machine-specific configuration
 ###
 {% if machine_sizes is defined and machine_sizes | length > 0 %}
 {% for machine in machine_sizes %}
-### {{ machine.name }} hardware checks
-### Basics
+### Machine: {{ machine.name }}
+{% if machine.name == "hb120-64rs_v3" %}
+{% include 'nhc_hb120rs_v3.conf' %}
+{% elif machine.name == "nd96amsr_a100_v4" %}
+{% include 'nhc_nd96amsr_a100_v4.conf' %}
+{% elif machine.name == "nd96asr_v4" %}
+{% include 'nhc_nd96asr_v4.conf' %}
+{% else %}
+### Default hardware checks for {{ machine.name }}
  * || check_hw_cpuinfo {{ machine.vcpus }} {{ machine.vcpus }} {{ machine.vcpus }}
  * || check_hw_physmem {{ (machine.memory_gb * 1024 * 1024) | int }}kB {{ (machine.memory_gb * 1024 * 1024) | int }}kB 3%
-
-### Local Storage
- * || check_fs_mount_rw -f "/mnt/local"  # Adjust mount point and thresholds as needed
-
-### Remote Storage
- * || check_fs_mount_rw -f "/mnt/remote" # Adjust mount point and thresholds as needed
-
-### Network
  * || check_hw_eth ib0
-
-### Accelerators
- * || check_hw_accelerators  # Modify or remove if not applicable
-
+{% endif %}
 {% endfor %}
 {% else %}
 # No machine sizes defined.
