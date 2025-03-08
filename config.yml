@@ -109,7 +109,7 @@ queues:
   - name: htc
     vm_size: Standard_F2s_v2
     max_core_count: 1024
-    image: azhpc:azhop-compute:almalinux-8_10:2024.1209.1326
+    image: azhpc:azhop-compute:ubuntu-20_04:2024.0305.1320
     EnableAcceleratedNetworking: false
     spot: false
     ColocateNodes: false
@@ -118,12 +118,13 @@ queues:
   - name: hpc
     vm_size: Standard_HB120-64rs_v3 #Standard_HB176-48rs_v4
     max_core_count: 1000
-    image: azhpc:azhop-compute:almalinux-8_10:2024.1209.1326
+    image: azhpc:azhop-compute:ubuntu-20_04:2024.0305.1320
     EnableAcceleratedNetworking: true
+    ColocateNodes: true
   - name: viz3d
     vm_size: Standard_NC8as_T4_v3
     max_core_count: 192
-    image: azhpc:azhop-desktop:almalinux-8_10:2024.1209.1416
+    image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     ColocateNodes: false
     EnableAcceleratedNetworking: true
     max_hours: 12
@@ -131,7 +132,7 @@ queues:
   - name: largeviz3d
     vm_size: Standard_NC64as_T4_v3
     max_core_count: 192
-    image: azhpc:azhop-desktop:almalinux-8_10:2024.1209.1416
+    image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     ColocateNodes: false
     EnableAcceleratedNetworking: true
     max_hours: 12
@@ -139,7 +140,7 @@ queues:
   - name: viz
     vm_size: Standard_HB120-16rs_v3
     max_core_count: 200
-    image: azhpc:azhop-desktop:almalinux-8_10:2024.1209.1416
+    image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     ColocateNodes: false
     EnableAcceleratedNetworking: true
     max_hours: 12
