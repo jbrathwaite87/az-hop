@@ -44,6 +44,10 @@ network:
         address_prefixes: "10.0.0.8/29"
       compute:
         address_prefixes: "10.0.1.0/24"
+private_dns:
+  create: true
+  name: hpc.azure
+  registration_enabled: true
 
 # Base image configuration. Can be either an image reference or an image_id from the image registry or a custom managed image
 linux_base_image: "OpenLogic:CentOS:8_5-gen2:8.5.2022101801" # publisher:offer:sku:version or image_id
