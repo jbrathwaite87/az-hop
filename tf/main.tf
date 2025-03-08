@@ -2,19 +2,22 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.94.0"
+      version = "4.22.0"
     }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.3.0"
     }
   }
-  required_version = ">= 0.13"
 }
 
 
 provider "azurerm" {
   features {
+    netapp {
+      prevent_volume_destruction             = false
+      delete_backups_on_backup_vault_destroy = true
+    }
   }
 }
 
