@@ -3,7 +3,7 @@
   shell: |
     apt -y install wget gnupg2
     wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-    echo 'deb https://packages.microsoft.com/repos/cyclecloud bionic main' > /etc/apt/sources.list.d/cyclecloud.list
+    echo 'deb [arch=amd64] https://packages.microsoft.com/repos/cyclecloud jammy main' > /etc/apt/sources.list.d/cyclecloud.list
     sudo apt update
   args:
     creates: /etc/apt/sources.list.d/cyclecloud.list
