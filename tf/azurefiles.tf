@@ -12,7 +12,7 @@ resource "azurerm_storage_account" "nfsfiles" {
     large_file_share_enabled = true
     min_tls_version          = "TLS1_2"
     access_tier              = "Hot"
-    enable_https_traffic_only = false
+    #enable_https_traffic_only = false
 
     share_properties {
       smb {
