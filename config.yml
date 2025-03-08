@@ -122,7 +122,7 @@ queues:
     EnableAcceleratedNetworking: true
     ColocateNodes: true
   - name: viz3d
-    vm_size: Standard_NC8as_T4_v3
+    vm_size: Standard_NV12ads_A10_v5
     max_core_count: 192
     image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     ColocateNodes: false
@@ -130,7 +130,7 @@ queues:
     max_hours: 12
     min_hours: 1
   - name: largeviz3d
-    vm_size: Standard_NC64as_T4_v3
+    vm_size: Standard_NV72ads_A10_v5
     max_core_count: 192
     image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     ColocateNodes: false
