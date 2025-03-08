@@ -29,23 +29,35 @@ mounts:
 admin_user: hpcadmin
 # Network
 network:
-  vnet:
-    name: hpcvnet
-    address_space: "10.0.0.0/20" 
+  name: hpcvnet
+    address_space: 10.128.0.0/20
     subnets:
-    # All values below are the default values
       frontend:
-        address_prefixes: "10.0.0.0/29"
+        name: frontend
+        address_prefixes: 10.128.0.0/29
+        create: true
       admin:
-        address_prefixes: "10.0.0.16/28"
+        name: admin
+        address_prefixes: 10.128.0.16/28
+        create: true
       netapp:
-        address_prefixes: "10.0.0.32/28"
+        name: netapp
+        address_prefixes: 10.128.0.32/28
+        create: true
       ad:
-        address_prefixes: "10.0.0.8/29"
-      compute:
-        address_prefixes: "10.0.1.0/24"
+        name: ad
+        address_prefixes: 10.128.0.8/29
+        create: true
       bastion:
-        address_prefixes: "10.0.2.0/26
+        address_prefixes: 10.128.3.0/26
+        create: false
+      compute:
+        name: compute
+        address_prefixes: 10.128.1.0/24
+        create: true
+      database:
+        name: database
+        address_prefixes: 10.128.2.0/26
 private_dns:
   create: true
   name: hpc.azure
