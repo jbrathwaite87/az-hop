@@ -12,7 +12,7 @@ resource "azurerm_network_interface" "ondemand-nic" {
   name                = "${local.ondemand_name}-nic"
   location            = local.create_rg ? azurerm_resource_group.rg[0].location : data.azurerm_resource_group.rg[0].location
   resource_group_name = local.create_rg ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
-  enable_accelerated_networking = true
+  #enable_accelerated_networking = true
 
   ip_configuration {
     name                          = "internal"
