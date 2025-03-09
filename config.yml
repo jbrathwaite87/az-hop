@@ -123,6 +123,14 @@ queues:
     EnableAcceleratedNetworking: true
     ColocateNodes: true
     idle_timeout: 300
+    
+  - name: cfd
+    vm_size: Standard_HB176-48rs_v4
+    max_core_count: 1000
+    image: azhpc:azhop-compute:ubuntu-20_04:2024.0305.1320
+    EnableAcceleratedNetworking: true
+    ColocateNodes: true
+    idle_timeout: 300
 
   #- name: viz3d
   #  type: remoteviz
