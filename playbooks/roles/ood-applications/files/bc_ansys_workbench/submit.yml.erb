@@ -1,48 +1,125 @@
----
-<%-
+#!/usr/bin/env bash
 
-require "yaml"
-node_arrays = YAML.load_file("/etc/ood/config/apps/bc_desktop/config/node_arrays.yml")
-node_ratio = bucket.to_i
+<%- gpu = context.node_type.include?("vis") -%>
 
-if OodAppkit.clusters[cluster].job_config[:adapter] == 'slurm'
-  scheduler_args = ["-p", target]
+# Clean the environment
+module purge
 
-  # If the user has specified a node ratio greather than 1, set the job ppn
-  slot_type = node_arrays.find { |slot_type| slot_type["name"] == target }
-  gpu_count = slot_type["gpuCount"].to_i
-  if node_ratio > 1
-    cores = (slot_type["vcpuCount"].to_i / node_ratio)
-    gpu_count = (gpu_count.to_f / node_ratio.to_f).ceil
-    scheduler_args += ["--ntasks-per-node=%d" % cores]
-  else
-    scheduler_args += ["--exclusive"]
-  end
-  if gpu_count > 0
-    scheduler_args += ["--gpus=%d" % gpu_count]
-  end
+# Set working directory to home directory
+cd "${HOME}"
 
+#
+# Launch Xfce Window Manager and Panel
+#
+export SEND_256_COLORS_TO_REMOTE=1
+export XDG_CONFIG_HOME="<%= session.staged_root.join("config") %>"
+export XDG_DATA_HOME="<%= session.staged_root.join("share") %>"
+export XDG_CACHE_HOME="$(mktemp -d)"
+export $(dbus-launch)
+
+module restore
+set -x
+
+source /etc/os-release
+
+if [[ "$VERSION_ID" < "9" ]]; then
+  xfwm4 --compositor=off --daemon --sm-client-disable
+  xsetroot -solid "#D3D3D3"
+  xfsettingsd --sm-client-disable
+  xfce4-panel --sm-client-disable &
 else
-  scheduler_args = ["-q", "vizq"]
-  if node_ratio > 1
-    node_arrays.each do |slot_type|
-      if slot_type["name"] == target
-        cores = (slot_type["vcpuCount"].to_i / node_ratio)
-        scheduler_args += ["-l", "select=1:slot_type=%s:ncpus=%d" % [target, cores]]
-        break
-      end
-    end
-  else
-    scheduler_args += ["-l", "select=1:slot_type=%s,place=scatter:excl" % target]
-  end
-end
+  xfwm4 --compositor=off --sm-client-disable &
+  xsetroot -solid "#D3D3D3"
+  xfsettingsd --sm-client-disable &
+  xfce4-panel --sm-client-disable &
+fi
 
--%>
+#
+# Start ANSYS Workbench
+#
 
-batch_connect:
-  template: "vnc"
-script:
-  native:
-  <%- scheduler_args.each do |arg| %>
-    - "<%= arg %>"
-  <%- end %>
+# Load the required environment
+module load xalt/latest <%= context.version %>
+
+<% if context.user_license_provider == 'external' %>
+# Attempting to use a 3rd party license server
+export ANS_FLEXLM_DISABLE_DEFLICPATH=1
+export ANSYSLI_SERVERS=<%= context.extern_license_server %>
+export ANSYSLMD_LICENSE_FILE=<%= context.extern_license_file %>
+<% end %>
+
+# Another ANSYS job with the same job name (file) is already running in this
+# directory or the file.lock file has not been deleted from an abnormally
+# terminated ANSYS run.  To disable this check, set the ANSYS_LOCK environment
+# variable to OFF.
+export ANSYS_LOCK="OFF"
+
+#
+# CFX Related Options
+#
+
+<%- unless gpu -%>
+# Disable hardware rendering mode
+export CUE_GRAPHICS="mesa"
+<%- end -%>
+
+# Fix bug when running Intel MPI code on OSC
+# May no longer be necessary? intelmpi seemed to be specific to ANSYS ~15
+# TODO check if this is still necessary
+export I_MPI_PMI_EXTENSIONS=on
+
+# Add custom "OSC MPI" as a start method
+export CFX5_START_METHODS_CCL="<%= session.staged_root.join("cfx_assets", "start-methods.ccl") %>"
+
+# disable checking for dependencies because it takes forever. See INC0370959.
+export ANS_NODEPCHECK='nothankyou'
+
+# Make a hosts file that CFX will use in Parallel Distributed
+mkdir -p "${HOME}/.cfx"
+export CFX5_HOSTS_CCL="${HOME}/.cfx/hostinfo.${PBS_JOBID}"
+NODES=$(tr '\n' ',' < "${PBS_NODEFILE}" | sed 's/,$//g')
+cfx5parhosts -add "${NODES}" -user -file "${CFX5_HOSTS_CCL}"
+
+# Only give OSC MPI option to user through GUI
+HOSTINFO=$(head -n -2 "${CFX5_HOSTS_CCL}")
+cat > "${CFX5_HOSTS_CCL}" << EOL
+${HOSTINFO}
+    SOLVER STEP CONTROL:
+      Runtime Priority = Standard
+      MEMORY CONTROL:
+        Memory Allocation Factor = 1.0
+      END
+      PARALLEL ENVIRONMENT:
+        Parallel Host List = ${NODES}
+        Start Method = OSC MPI Distributed Parallel
+      END
+    END
+  END # EXECUTION CONTROL
+END # SIMULATION CONTROL
+EOL
+
+#
+# RSH & SSH wrappers
+#
+
+# Add RSH and SSH wrappers for Fluent and CFX
+export PATH="<%= session.staged_root.join("bin") %>:${PATH}"
+
+export NODEFILE="$TMPDIR/nodelist"
+node_parser > $NODEFILE
+
+# Fix the mulitl-node job issue with Intel MPI due to Slurm upgrade
+# https://www.osc.edu/resources/technical_support/known_issues/parallel_job_with_intelmpi_hangs
+export -n I_MPI_HYDRA_BOOTSTRAP_EXEC_EXTRA_ARGS
+
+# Launch ANSYS Workbench
+<%- if gpu -%>
+module load virtualgl
+module list
+set -x
+vglrun runwb2
+<%- else -%>
+module list
+set -x
+runwb2
+<%- end -%>
