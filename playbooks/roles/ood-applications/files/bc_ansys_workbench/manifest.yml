@@ -4,7 +4,9 @@ category: Interactive Apps
 subcategory: GUIs
 role: batch_connect
 description: |
-  This app will launch an [ANSYS Workbench] within a [Turbo VNC].
+  This app will launch an [ANSYS Workbench] within a [Turbo VNC] server on the
+  [Cardinal cluster].
 
   [ANSYS Workbench]: https://www.ansys.com/
   [Turbo VNC]: https://www.turbovnc.org/
+  [Cardinal cluster]: https://www.osc.edu/resources/technical_support/supercomputers/cardinal
