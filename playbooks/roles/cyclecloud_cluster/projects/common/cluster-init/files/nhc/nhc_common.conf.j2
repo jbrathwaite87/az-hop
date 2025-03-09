@@ -76,6 +76,8 @@
 {% include 'nhc_nd96amsr_a100_v4.conf' %}
 {% elif machine.name == "nd96asr_v4" %}
 {% include 'nhc_nd96asr_v4.conf' %}
+{% elif machine.name == "hb176-48rs_v4" %}
+{% include 'nhc_hb176-48rs_v4.conf' %}
 {% else %}
 ### Default hardware checks for {{ machine.name }}
  * || check_hw_cpuinfo {{ machine.vcpus }} {{ machine.vcpus }} {{ machine.vcpus }}
