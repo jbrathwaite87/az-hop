@@ -7,22 +7,30 @@
       - "cyclecloud_version={{cyclecloud_version}}"
       - "Distribution={{ansible_distribution}}"
       - "Install CC={{install_cyclecloud}}"
-
+      
 - name: mount data disk
   shell: |
     set -e
-    # If cycle_server is already mounted, exit
-    if grep -q cycle_server /etc/fstab; then exit 0; fi
+    # If cycle_server is already mounted, exit early
+    if grep -q cycle_server /etc/fstab; then
+      echo "Disk already mounted, skipping formatting."
+      exit 0
+    fi
     parted /dev/disk/azure/scsi1/lun0 --script -- mklabel gpt
     parted -a optimal /dev/disk/azure/scsi1/lun0 mkpart primary 0% 100%
-    # try a sleep here to wait for the symlink
     sleep 10s
-    mkfs -t xfs /dev/disk/azure/scsi1/lun0-part1
-    disk_uuid=$(blkid -o value -s UUID  /dev/disk/azure/scsi1/lun0-part1)
-    mkdir /opt/cycle_server
+    # Check if a filesystem already exists
+    if blkid /dev/disk/azure/scsi1/lun0-part1; then
+      echo "Filesystem already exists, skipping mkfs."
+    else
+      mkfs -t xfs /dev/disk/azure/scsi1/lun0-part1
+    fi
+    disk_uuid=$(blkid -o value -s UUID /dev/disk/azure/scsi1/lun0-part1)
+    mkdir -p /opt/cycle_server
     echo "UUID=$disk_uuid /opt/cycle_server xfs defaults,nofail 1 2" >> /etc/fstab
     mount /opt/cycle_server
   when: install_cyclecloud
+
 
 - name: Perform OS dependent configuration tasks
   include_tasks: "{{ansible_distribution}}.yml"
