@@ -127,7 +127,7 @@ queues:
   - name: cfd
     vm_size: Standard_HB176-48rs_v4
     max_core_count: 1000
-    image: microsoft-dsvm:ubuntu-hpc:2204:latest
+    image: almalinux:almalinux-hpc:8_7-hpc-gen2:8.7.2023060101
     EnableAcceleratedNetworking: true
     ColocateNodes: true
     idle_timeout: 300
