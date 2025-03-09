@@ -1,95 +1,51 @@
 #!/usr/bin/env bash
 
-<%- 
-  require "yaml"
-  node_arrays = YAML.load_file("/etc/ood/config/apps/bc_desktop/config/node_arrays.yml")
-  slot_type = node_arrays.find { |slot_type| slot_type["name"] == context.target }
-  gpu_count = slot_type["gpuCount"].to_i 
--%>
-
 # Clean the environment
 module purge
 
 # Set working directory to home directory
 cd "${HOME}"
 
+#
 # Launch Xfce Window Manager and Panel
-source "<%= session.staged_root.join('xfce_kiosk.sh') %>"
+#
+export SEND_256_COLORS_TO_REMOTE=1
+export XDG_CONFIG_HOME="<%= session.staged_root.join("config") %>"
+export XDG_DATA_HOME="<%= session.staged_root.join("share") %>"
+export XDG_CACHE_HOME="$(mktemp -d)"
+export $(dbus-launch)
 
-<%- if gpu_count > 0 -%>
-GL_LAUNCHER="vglrun"
-PARAVIEW_SERVER_IMPL="egl"
-PARAVIEW_EXTRA_ARGS=""
+source /etc/os-release
+
+if [[ "$VERSION_ID" < "9" ]]; then
+  xfwm4 --compositor=off --daemon --sm-client-disable
+  xsetroot -solid "#D3D3D3"
+  xfsettingsd --sm-client-disable
+  xfce4-panel --sm-client-disable &
+else
+  xfwm4 --compositor=off --sm-client-disable &
+  xsetroot -solid "#D3D3D3"
+  xfsettingsd --sm-client-disable &
+  xfce4-panel --sm-client-disable &
+fi
+
+# Restore the module environment to avoid conflicts
+module restore
+
+#
+# Start Paraview
+#
+
+# Load the required environment
+<%- if context.cluster == 'owens' -%>
+module load xalt/latest intel/16.0.3 virtualgl <%= context.auto_modules_paraview %>
 <%- else -%>
-GL_LAUNCHER=""
-PARAVIEW_SERVER_IMPL="osmesa"
-PARAVIEW_EXTRA_ARGS="--mesa --backend swr"
+module load xalt/latest virtualgl <%= context.auto_modules_paraview %>
 <%- end -%>
 
-set -x -e
+# Output debug info
+module list
 
-# Start ParaView
-PARAVIEW_HOME_DIR="<%= context.paraview_home %>"
-PARAVIEW_VERSION="<%= context.version %>"
-PARAVIEW_CLIENT="glx/bin/paraview"
-PARAVIEW_SERVER="$PARAVIEW_SERVER_IMPL/bin/pvserver"
-
-# Set the timeout for the ParaView server (in minutes)
-# Subtract 5 minutes to allow for the client to connect and start rendering
-bc_num_hours=<%= context.bc_num_hours %>
-PARAVIEW_SERVER_TIMEOUT=$(( bc_num_hours * 60 - 5 ))
-
-source /etc/profile.d/modules.sh
-module use /usr/share/Modules/modulefiles
-module load mpi/mvapich2
-
-# Determine MPI rank count from scheduler environment variables
-if [[ -v PBS_NODEFILE ]]; then
-  RANKS=$(cat "$PBS_NODEFILE" | wc -l)
-  HOSTFILE=$PBS_NODEFILE
-elif [[ -v SLURM_JOB_NODELIST ]]; then
-  if [[ -v SLURM_NTASKS ]]; then
-    RANKS=$SLURM_NTASKS
-  else
-    RANKS=$SLURM_TASKS_PER_NODE
-  fi
-  HOSTFILE=$SLURM_JOB_NODELIST
-fi
-
-# Default RANKS to 1 if not set
-if [ -z "$RANKS" ]; then
-  RANKS=1
-fi
-
-echo "Detected RANKS: $RANKS"
-
-# Launch pvserver
-<%- if gpu_count > 0 -%>
-# On GPU instances, always launch pvserver even if only one rank is requested.
-if [ "$RANKS" -ge 1 ]; then
-  PARAVIEW_EXTRA_ARGS="$PARAVIEW_EXTRA_ARGS --url cs://$(hostname):11111"
-  (
-    # Disable CPU affinity to avoid oversubscription errors
-    export MV2_ENABLE_AFFINITY=0
-    $GL_LAUNCHER mpirun -np "$RANKS" \
-          "$PARAVIEW_HOME_DIR/$PARAVIEW_VERSION/$PARAVIEW_SERVER" \
-          --system-mpi \
-          --timeout "$PARAVIEW_SERVER_TIMEOUT"
-  ) &
-fi
-<%- else -%>
-# For non-GPU cases, launch pvserver only if more than one MPI rank is requested.
-if [ "$RANKS" -gt 1 ]; then
-  PARAVIEW_EXTRA_ARGS="$PARAVIEW_EXTRA_ARGS --url cs://$(hostname):11111"
-  (
-    export MV2_ENABLE_AFFINITY=0
-    $GL_LAUNCHER mpirun -np "$RANKS" \
-          "$PARAVIEW_HOME_DIR/$PARAVIEW_VERSION/$PARAVIEW_SERVER" \
-          --system-mpi \
-          --timeout "$PARAVIEW_SERVER_TIMEOUT"
-  ) &
-fi
-<%- end -%>
-
-# Launch the ParaView client
-$GL_LAUNCHER "$PARAVIEW_HOME_DIR/$PARAVIEW_VERSION/$PARAVIEW_CLIENT" $PARAVIEW_EXTRA_ARGS
+# Launch ParaView
+set -x
+vglrun paraview
