@@ -134,7 +134,7 @@ queues:
 
   - name: h100
     vm_size: Standard_NC40ads_H100_v5
-    max_core_count: 1000
+    max_core_count: 196
     image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     EnableAcceleratedNetworking: true
     ColocateNodes: true
