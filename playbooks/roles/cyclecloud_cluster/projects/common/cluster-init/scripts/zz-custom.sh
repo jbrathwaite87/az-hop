@@ -40,11 +40,11 @@ EOF
     
     # If another naming scheme is used, create that file too
     if [[ "$VM_SIZE" == "hb176-48rs_v4" ]]; then
-        ALT_CONFIG="$script_dir/../files/nhc/nhc_hb176rs_v4.conf"
+        ALT_CONFIG="$script_dir/../files/nhc/nhc_hb176-48rs_v4.conf"
         cp -f "$NHC_CONFIG_EXTRA" "$ALT_CONFIG"
         echo "Created alternate config at $ALT_CONFIG"
     elif [[ "$VM_SIZE" == "hb176rs_v4" ]]; then
-        ALT_CONFIG="$script_dir/../files/nhc/nhc_hb176-48rs_v4.conf"
+        ALT_CONFIG="$script_dir/../files/nhc/nhc_hb176rs_v4.conf"
         cp -f "$NHC_CONFIG_EXTRA" "$ALT_CONFIG"
         echo "Created alternate config at $ALT_CONFIG"
     fi
