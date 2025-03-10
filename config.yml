@@ -166,7 +166,7 @@ queues:
   - name: viz
     type: remoteviz
     vm_size: Standard_HB120-16rs_v3
-    max_core_count: 200
+    max_core_count: 1000
     image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     ColocateNodes: false
     EnableAcceleratedNetworking: true
@@ -179,7 +179,7 @@ image_gallery:
 
 applications:
   bc_codeserver:
-    enabled: false
+    enabled: true
   bc_jupyter:
     enabled: false
   bc_amlsdk:
@@ -191,6 +191,6 @@ applications:
   bc_vmd:
     enabled: false
   bc_paraview:
-    enabled: false
+    enabled: true
   bc_vizer:
     enabled: false
