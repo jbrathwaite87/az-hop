@@ -141,15 +141,15 @@ queues:
     idle_timeout: 300
   
 
-  - name: viz3d
-    type: remoteviz
-    vm_size: Standard_NC16as_T4_v3
-    max_core_count: 192
-    image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
-    ColocateNodes: false
-    EnableAcceleratedNetworking: true
-    max_hours: 12
-    min_hours: 1
+ # - name: viz3d
+ #   type: remoteviz
+ #   vm_size: Standard_NC16as_T4_v3
+ #   max_core_count: 192
+ #   image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
+ #   ColocateNodes: false
+ #   EnableAcceleratedNetworking: true
+ #   max_hours: 12
+ #   min_hours: 1
 
   #- name: largeviz3d
   #  type: remoteviz
@@ -191,6 +191,6 @@ applications:
   bc_vmd:
     enabled: false
   bc_paraview:
-    enabled: true
+    enabled: false
   bc_vizer:
     enabled: false
