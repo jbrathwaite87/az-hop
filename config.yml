@@ -179,7 +179,7 @@ image_gallery:
 
 applications:
   bc_codeserver:
-    enabled: true
+    enabled: false
   bc_jupyter:
     enabled: false
   bc_amlsdk:
