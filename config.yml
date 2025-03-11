@@ -99,22 +99,22 @@ enroot:
   enroot_version: 3.4.1
 authentication:
   user_auth: ad
-  httpd_auth: oidc
+  httpd_auth: basic
   # User mapping https://osc.github.io/ood-documentation/latest/reference/files/ood-portal-yml.html#ood-portal-generator-user-map-match
   # You can specify either a map_match or a user_map_cmd
   # Domain users are mapped to az-hop users with the same name and without the domain name
-  user_map_match: '^([^@]+)@mydomain.foo$'
+  # user_map_match: '^([^@]+)@mydomain.foo$'
   # If using a custom mapping script, update it from the ./playbooks/files directory before running the playbook
   # user_map_cmd: /opt/ood/ood_auth_map/bin/custom_mapping.sh
-  ood_auth_openidc:
-   OIDCProviderMetadataURL: https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration # for AAD use 'https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration'
-   OIDCClientID: b22391ca-be0d-4ded-bd82-363f6e9f3e97
-   OIDCRemoteUserClaim: unique_name # for AAD use 'unique_name'
-   OIDCScope: openid profile emaiil groups # for AAD use 'openid profile email groups'
-   OIDCPassIDTokenAs: serialized # for AAD use 'serialized'
-   OIDCPassRefreshToken: On # for AAD use 'On'
-   OIDCPassClaimsAs: environment # for AAD use 'environment'
-   OIDCStateMaxNumberOfCookies: [10, true] # in case of too many connections error for the same user set this to [10, true]
+  # ood_auth_openidc:
+  # OIDCProviderMetadataURL: https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration # for AAD use 'https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration'
+  # OIDCClientID: b22391ca-be0d-4ded-bd82-363f6e9f3e97
+  # OIDCRemoteUserClaim: unique_name # for AAD use 'unique_name'
+  # OIDCScope: openid profile emaiil groups # for AAD use 'openid profile email groups'
+  # OIDCPassIDTokenAs: serialized # for AAD use 'serialized'
+  # OIDCPassRefreshToken: On # for AAD use 'On'
+  # OIDCPassClaimsAs: environment # for AAD use 'environment'
+  # OIDCStateMaxNumberOfCookies: [10, true] # in case of too many connections error for the same user set this to [10, true]
 autoscale:
   idle_timeout: 1800
 queues:
