@@ -107,14 +107,14 @@ authentication:
   # If using a custom mapping script, update it from the ./playbooks/files directory before running the playbook
   # user_map_cmd: /opt/ood/ood_auth_map/bin/custom_mapping.sh
   ood_auth_openidc:
-     OIDCProviderMetadataURL: https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration # for AAD use 'https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration'
-     OIDCClientID: b22391ca-be0d-4ded-bd82-363f6e9f3e97
-     OIDCRemoteUserClaim: unique_name # for AAD use 'unique_name'
-     OIDCScope: openid profile emaiil groups # for AAD use 'openid profile email groups'
-     OIDCPassIDTokenAs: serialized # for AAD use 'serialized'
-     OIDCPassRefreshToken: On # for AAD use 'On'
-     OIDCPassClaimsAs: environment # for AAD use 'environment'
-     OIDCStateMaxNumberOfCookies: [10, true] # in case of too many connections error for the same user set this to [10, true]
+   OIDCProviderMetadataURL: https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration # for AAD use 'https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration'
+   OIDCClientID: b22391ca-be0d-4ded-bd82-363f6e9f3e97
+   OIDCRemoteUserClaim: unique_name # for AAD use 'unique_name'
+   OIDCScope: openid profile emaiil groups # for AAD use 'openid profile email groups'
+   OIDCPassIDTokenAs: serialized # for AAD use 'serialized'
+   OIDCPassRefreshToken: On # for AAD use 'On'
+   OIDCPassClaimsAs: environment # for AAD use 'environment'
+   OIDCStateMaxNumberOfCookies: [10, true] # in case of too many connections error for the same user set this to [10, true]
 autoscale:
   idle_timeout: 1800
 queues:
