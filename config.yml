@@ -77,13 +77,9 @@ cyclecloud:
   image: canonical:0001-com-ubuntu-pro-focal:pro-20_04-lts-gen2:20.04.202502181 #canonical:0001-com-ubuntu-minimal-focal-daily:minimal-20_04-daily-lts-gen2:20.04.202502040
   plan: canonical:0001-com-ubuntu-pro-focal:pro-20_04-lts-gen2
 users:
-  - name: clusteradmin
-    uid: 10001
-    groups:
-      - 5001
-      - 5002
-  - name: hpcuser
-    uid: 10002
+  - { name: clusteradmin, uid: 10001, groups: [5001, 5002] }
+  - { name: hpcuser, uid: 10002 }
+  - { name: jared.brathwaite, uid: 10003, groups: [5001, 5002] }
 usergroups:
   - name: Domain Users
     gid: 5000
@@ -102,7 +98,23 @@ slurm:
 enroot:
   enroot_version: 3.4.1
 authentication:
-  httpd_auth: basic
+  user_auth: ad
+  httpd_auth: oidc
+  # User mapping https://osc.github.io/ood-documentation/latest/reference/files/ood-portal-yml.html#ood-portal-generator-user-map-match
+  # You can specify either a map_match or a user_map_cmd
+  # Domain users are mapped to az-hop users with the same name and without the domain name
+  user_map_match: '^([^@]+)@mydomain.foo$'
+  # If using a custom mapping script, update it from the ./playbooks/files directory before running the playbook
+  # user_map_cmd: /opt/ood/ood_auth_map/bin/custom_mapping.sh
+  ood_auth_openidc:
+     OIDCProviderMetadataURL: https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration # for AAD use 'https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration'
+     OIDCClientID: b22391ca-be0d-4ded-bd82-363f6e9f3e97
+     OIDCRemoteUserClaim: unique_name # for AAD use 'unique_name'
+     OIDCScope: openid profile emaiil groups # for AAD use 'openid profile email groups'
+     OIDCPassIDTokenAs: serialized # for AAD use 'serialized'
+     OIDCPassRefreshToken: On # for AAD use 'On'
+     OIDCPassClaimsAs: environment # for AAD use 'environment'
+     OIDCStateMaxNumberOfCookies: [10, true] # in case of too many connections error for the same user set this to [10, true]
 autoscale:
   idle_timeout: 1800
 queues:
