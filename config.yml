@@ -173,6 +173,15 @@ queues:
     max_hours: 12
     min_hours: 1
     
+  - name: login
+    type: login
+    vm_size: Standard_F4s_v2
+    initial_count: 1
+    max_count: 1
+    image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
+    ColocateNodes: false
+    EnableAcceleratedNetworking: true
+    
 image_gallery:
   create: false
 
