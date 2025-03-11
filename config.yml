@@ -162,6 +162,7 @@ queues:
     EnableAcceleratedNetworking: true
     max_hours: 12
     min_hours: 1
+    idle_timeout: 300
 
   #- name: largeviz3d
   #  type: remoteviz
