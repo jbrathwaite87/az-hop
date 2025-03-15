@@ -80,6 +80,7 @@ users:
   - { name: clusteradmin, uid: 10001, groups: [5001, 5002] }
   - { name: hpcuser, uid: 10002 }
   - { name: jared.brathwaite, uid: 10003, groups: [5001, 5002] }
+  - { name: sagar, uid: 10003, groups: [5001, 5002] }
 usergroups:
   - name: Domain Users
     gid: 5000
