@@ -17,15 +17,16 @@ cd "${HOME}"
 # Launch Xfce Window Manager and Panel
 source "<%= session.staged_root.join("xfce_kiosk.sh") %>"
 
-<%- if gpu_count > 0 -%>
+<%- if gpu_count >= 1 -%>
 GL_LAUNCHER="vglrun"
 PARAVIEW_SERVER_IMPL="egl"
 PARAVIEW_EXTRA_ARGS=
 <%- else -%>
-GL_LAUNCHER=
-PARAVIEW_SERVER_IMPL="osmesa"
-PARAVIEW_EXTRA_ARGS="--mesa --backend swr"
+GL_LAUNCHER="CUDA_VISIBLE_DEVICES=0 vglrun"  # Use a fractional GPU
+PARAVIEW_SERVER_IMPL="egl"
+PARAVIEW_EXTRA_ARGS=
 <%- end -%>
+
 
 set -x -e
 
