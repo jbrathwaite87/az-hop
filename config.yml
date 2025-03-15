@@ -154,16 +154,16 @@ queues:
     idle_timeout: 300
   
 
-  #- name: viz3d
-  #  type: remoteviz
-  #  vm_size: Standard_NV36ads_A10_v5
-  #  max_core_count: 192
-  #  image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
-  #  ColocateNodes: false
-  #  EnableAcceleratedNetworking: true
-  #  max_hours: 12
-  #  min_hours: 1
-  #  idle_timeout: 300
+  - name: viz3d
+    type: remoteviz
+    vm_size: Standard_NV36ads_A10_v5
+    max_core_count: 192
+    image: nvidia:nvidia-gpu-optimized-vmi-a10:nvidia_base_a10_vmi_22_08_gen2:22.08.8 #azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
+    ColocateNodes: false
+    EnableAcceleratedNetworking: true
+    max_hours: 12
+    min_hours: 1
+    idle_timeout: 300
 
   #- name: largeviz3d
   #  type: remoteviz
