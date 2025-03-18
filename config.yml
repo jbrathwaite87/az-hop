@@ -148,26 +148,26 @@ queues:
     ColocateNodes: true
     idle_timeout: 300
 
-  - name: h100
-    vm_size: Standard_NC40ads_H100_v5
-    max_core_count: 196
-    image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
-    EnableAcceleratedNetworking: true
-    ColocateNodes: true
-    idle_timeout: 300
+ # - name: h100
+ #   vm_size: Standard_NC40ads_H100_v5
+ #   max_core_count: 196
+ #   image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
+ #   EnableAcceleratedNetworking: true
+ #   ColocateNodes: true
+ #   idle_timeout: 300
   
 
- # - name: viz3d
-  #  type: remoteviz
-   # vm_size: Standard_NV36ads_A10_v5
-    #max_count: 10
-    #max_core_count: 192
-    #image: nvidia:nvidia-gpu-optimized-vmi-a10:nvidia_base_a10_vmi_22_08_gen2:22.08.8 #azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
-    #ColocateNodes: false
-    #EnableAcceleratedNetworking: true
-    #max_hours: 12
-    #min_hours: 1
-    #idle_timeout: 300
+  - name: viz3d
+    type: remoteviz
+    vm_size: Standard_NV36ads_A10_v5
+    max_count: 10
+    max_core_count: 192
+    image: microsoft-dsvm:ubuntu-2204:2204-gen2:25.01.20 #azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
+    ColocateNodes: false
+    EnableAcceleratedNetworking: true
+    max_hours: 12
+    min_hours: 1
+    idle_timeout: 300
 
   #- name: largeviz3d
   #  type: remoteviz
