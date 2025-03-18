@@ -183,7 +183,7 @@ queues:
 
   - name: viz
     type: remoteviz
-    vm_size: Standard_F4s_v2
+    vm_size: Standard_NV32as_v4
     max_core_count: 1000
     image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
     ColocateNodes: false
