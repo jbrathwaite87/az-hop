@@ -157,25 +157,25 @@ queues:
  #   idle_timeout: 300
   
 
-#  - name: viz3d
-#    type: remoteviz
-#    vm_size: Standard_NV36ads_A10_v5
-#    max_count: 10
-#    max_core_count: 192
-#    image: microsoft-dsvm:ubuntu-hpc:2004:20.04.2024102301 #almalinux:almalinux-hpc:8_10-hpc-gen2:8.10.2024101801 #microsoft-dsvm:ubuntu-hpc:2204:22.04.2024102301 #azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339 
-#    ColocateNodes: false
-#    EnableAcceleratedNetworking: true
-#    max_hours: 12
-#    min_hours: 1
-#    idle_timeout: 300
+  - name: viz3d
+    type: remoteviz
+    vm_size: Standard_NC16as_T4_v3
+    max_count: 10
+    max_core_count: 192
+    image: microsoft-dsvm:ubuntu-hpc:2004:20.04.2024102301 #almalinux:almalinux-hpc:8_10-hpc-gen2:8.10.2024101801 #microsoft-dsvm:ubuntu-hpc:2204:22.04.2024102301 #azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339 
+    ColocateNodes: false
+    EnableAcceleratedNetworking: true
+    max_hours: 12
+    min_hours: 1
+    idle_timeout: 300
 
   #- name: largeviz3d
   #  type: remoteviz
   #  description: "Large With GPU - Intended for shared sessions"
   #  shareable: true
-  #  vm_size: Standard_NV72ads_A10_v5
+  #  vm_size: Standard_NC64as_T4_v3
   #  max_core_count: 192
-  #  image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
+  #  image: microsoft-dsvm:ubuntu-hpc:2004:20.04.2024102301
   #  ColocateNodes: false
   #  EnableAcceleratedNetworking: true
   #  max_hours: 12
