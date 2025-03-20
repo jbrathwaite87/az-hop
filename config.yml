@@ -102,27 +102,27 @@ enroot:
   enroot_version: 3.4.1
 authentication:
   user_auth: ad
-  httpd_auth: oidc
+  httpd_auth: basic
   # User mapping https://osc.github.io/ood-documentation/latest/reference/files/ood-portal-yml.html#ood-portal-generator-user-map-match
   # You can specify either a map_match or a user_map_cmd
   # Domain users are mapped to az-hop users with the same name and without the domain name
-  user_map_match: "^([^@]+)@mydomain.foo$"
+  #user_map_match: "^([^@]+)@mydomain.foo$"
   # If using a custom mapping script, update it from the ./playbooks/files directory before running the playbook
   #user_map_cmd: /opt/ood/ood_auth_map/bin/custom_mapping.sh
-  ood_auth_openidc:
-    OIDCProviderMetadataURL: "https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration" # for AAD use 'https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration'
-    OIDCClientID: "b22391ca-be0d-4ded-bd82-363f6e9f3e97"
-    OIDCRemoteUserClaim: "upn" # for AAD use 'upn'
-    OIDCScope: "openid profile email groups" # for AAD use 'openid profile email groups'
-    OIDCPassIDTokenAs: "serialized" # for AAD use 'serialized'
-    OIDCPassRefreshToken: "On" # for AAD use 'On'
-    OIDCPassClaimsAs: "environment" # for AAD use 'environment'
+  #ood_auth_openidc:
+  #  OIDCProviderMetadataURL: "https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration" # for AAD use 'https://sts.windows.net/{{tenant_id}}/.well-known/openid-configuration'
+  #  OIDCClientID: "b22391ca-be0d-4ded-bd82-363f6e9f3e97"
+  #  OIDCRemoteUserClaim: "upn" # for AAD use 'upn'
+  #  OIDCScope: "openid profile email groups" # for AAD use 'openid profile email groups'
+  #  OIDCPassIDTokenAs: "serialized" # for AAD use 'serialized'
+  #  OIDCPassRefreshToken: "On" # for AAD use 'On'
+  #  OIDCPassClaimsAs: "environment" # for AAD use 'environment'
     
 autoscale:
   idle_timeout: 1800
 queues:
   - name: htc
-    vm_size: Standard_F2s_v2
+    vm_size: Standard_HB120-16rs_v3
     max_core_count: 1024
     image: microsoft-dsvm:ubuntu-hpc:2204:latest
     EnableAcceleratedNetworking: false
@@ -157,18 +157,18 @@ queues:
  #   ColocateNodes: true
  #   idle_timeout: 300
   
-
   - name: viz3d
-    type: remoteviz
     vm_size: Standard_NV32as_v4
-    max_count: 10
-    max_core_count: 192
-    image: microsoft-dsvm:ubuntu-hpc:2004:20.04.2024102301 #almalinux:almalinux-hpc:8_10-hpc-gen2:8.10.2024101801 #microsoft-dsvm:ubuntu-hpc:2204:22.04.2024102301 #azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339 
+    max_count: 4
+    # Use the pre-built azhop image from the marketplace
+    image: azhpc:azhop-desktop:centos-7_9:latest
+    # Use this image ID when building your own custom images
+    #image: /subscriptions/{{subscription_id}}/resourceGroups/{{resource_group}}/providers/Microsoft.Compute/galleries/{{sig_name}}/images/azhop-centos79-desktop3d/latest
     ColocateNodes: false
     EnableAcceleratedNetworking: true
-    max_hours: 12
-    min_hours: 1
-    idle_timeout: 300
+    max_hours: 12 # Maximum session duration
+    min_hours: 1 # Minimum session duration - 0 is infinite
+    idle_timeout: 100
 
   #- name: largeviz3d
   #  type: remoteviz
@@ -195,7 +195,7 @@ queues:
     
   - name: login
     type: login
-    vm_size: Standard_F4s_v2
+    vm_size: Standard_F8s_v2
     initial_count: 1
     max_count: 1
     image: azhpc:azhop-desktop:ubuntu-20_04:2024.0305.1339
